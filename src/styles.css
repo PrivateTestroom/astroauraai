@@ -181,3 +181,37 @@
   50% { transform: translateY(-8px); }
 }
 .animate-float { animation: float-slow 6s ease-in-out infinite; }
+
+@layer components {
+  .input {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid oklch(1 0 0 / 15%);
+    background: oklch(1 0 0 / 5%);
+    padding: 0.875rem 0.875rem;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 120ms;
+  }
+  .input::placeholder { color: oklch(0.74 0.04 290); }
+  .input:focus { border-color: var(--color-primary); }
+
+  .select {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid oklch(1 0 0 / 15%);
+    background: oklch(0.21 0.06 290 / 95%);
+    color: var(--color-foreground);
+    padding: 0.875rem 0.875rem;
+    font-size: 1rem;
+    outline: none;
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+      linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 18px) center, calc(100% - 12px) center;
+    background-size: 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 2rem;
+  }
+  .select:focus { border-color: var(--color-primary); }
+}
