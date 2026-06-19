@@ -174,11 +174,10 @@
       radial-gradient(1px 1px at 55% 50%, white 1px, transparent 1px);
     opacity: 0.5;
   }
-  }
+}
 
 @keyframes float-slow {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
 .animate-float { animation: float-slow 6s ease-in-out infinite; }
-}
