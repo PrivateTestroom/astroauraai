@@ -15,12 +15,6 @@ export const Route = createFileRoute("/_authenticated/home")({
 
 function HomePage() {
   const profile = useProfile();
-
-  // gate onboarding
-  if (profile.data && !profile.data.onboarded) {
-    throw redirect({ to: "/onboarding" });
-  }
-
   const wallet = useQuery({
     queryKey: ["wallet"],
     queryFn: async () => {
@@ -43,6 +37,11 @@ function HomePage() {
       return (data ?? []) as Astrologer[];
     },
   });
+
+  // gate onboarding (after all hooks)
+  if (profile.data && !profile.data.onboarded) {
+    throw redirect({ to: "/onboarding" });
+  }
 
   const balanceInr = wallet.data ? (wallet.data.balance_paise / 100).toFixed(0) : "0";
   const recommended = astrologers.data?.filter((a) => a.is_recommended) ?? [];
