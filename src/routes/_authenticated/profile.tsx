@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { LogOut, Pencil, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/profile")({
-  head: () => ({ meta: [{ title: "Profile — AstroSage" }] }),
+  head: () => ({ meta: [{ title: "Profile — AstroAura" }] }),
   component: ProfilePage,
 });
 

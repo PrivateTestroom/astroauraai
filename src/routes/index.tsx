@@ -6,9 +6,9 @@ import { Sparkles, MessageCircle, Star } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AstroSage AI — Chat with AI Astrologers" },
+      { title: "AstroAura AI — Chat with AI Astrologers" },
       { name: "description", content: "Real Vedic, KP, Hellenistic and Tarot guidance from AI astrologers. Daily horoscope, birth chart, ₹5/min." },
-      { property: "og:title", content: "AstroSage AI — Chat with AI Astrologers" },
+      { property: "og:title", content: "AstroAura AI — Chat with AI Astrologers" },
       { property: "og:description", content: "Real Vedic, KP, Hellenistic and Tarot guidance from AI astrologers." },
     ],
   }),

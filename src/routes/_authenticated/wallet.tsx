@@ -14,7 +14,7 @@ const TIERS = [
 ];
 
 export const Route = createFileRoute("/_authenticated/wallet")({
-  head: () => ({ meta: [{ title: "Wallet — AstroSage" }] }),
+  head: () => ({ meta: [{ title: "Wallet — AstroAura" }] }),
   component: WalletPage,
 });
 

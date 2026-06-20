@@ -5,7 +5,7 @@ import { useIsAdmin } from "@/lib/profile";
 import { ArrowLeft, Users, Wallet, MessageSquare, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "Admin — AstroSage" }] }),
+  head: () => ({ meta: [{ title: "Admin — AstroAura" }] }),
   component: AdminPage,
 });
 

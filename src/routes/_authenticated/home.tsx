@@ -9,7 +9,7 @@ import { Wallet } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/home")({
-  head: () => ({ meta: [{ title: "Astrologers — AstroSage" }] }),
+  head: () => ({ meta: [{ title: "Astrologers — AstroAura" }] }),
   component: HomePage,
 });
 

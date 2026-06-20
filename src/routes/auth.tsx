@@ -13,7 +13,7 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
-  head: () => ({ meta: [{ title: "Sign in — AstroSage AI" }] }),
+  head: () => ({ meta: [{ title: "Sign in — AstroAura AI" }] }),
   beforeLoad: async () => {
     if (typeof window === "undefined") return;
     const { data } = await supabase.auth.getSession();
@@ -161,7 +161,7 @@ function AuthPage() {
       </button>
 
       <p className="mt-8 text-center text-sm text-muted-foreground">
-        {mode === "signup" ? "Already have an account?" : "New to AstroSage?"}{" "}
+        {mode === "signup" ? "Already have an account?" : "New to AstroAura?"}{" "}
         <button
           onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
           className="font-semibold text-accent underline-offset-2 hover:underline"

@@ -4,7 +4,7 @@ import { useProfile } from "@/lib/profile";
 import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/horoscope")({
-  head: () => ({ meta: [{ title: "Daily Horoscope — AstroSage" }] }),
+  head: () => ({ meta: [{ title: "Daily Horoscope — AstroAura" }] }),
   component: HoroscopePage,
 });
 
