@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, MessageCircle, Star, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/astrologer/$slug")({
-  head: () => ({ meta: [{ title: "Astrologer — AstroSage" }] }),
+  head: () => ({ meta: [{ title: "Astrologer — AstroAura" }] }),
   component: AstrologerProfile,
 });
 
@@ -54,14 +54,15 @@ function AstrologerProfile() {
         </div>
       </section>
 
-      <button
-        disabled
-        className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 font-semibold text-primary-foreground shadow-[0_8px_30px_-8px_rgba(168,85,247,0.7)] disabled:opacity-70"
+      <Link
+        to="/chat/$slug"
+        params={{ slug }}
+        className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 font-semibold text-primary-foreground shadow-[0_8px_30px_-8px_rgba(168,85,247,0.7)]"
       >
-        <MessageCircle className="h-5 w-5" /> Chat opens in Phase 2
-      </button>
+        <MessageCircle className="h-5 w-5" /> Start chat — 1 min free
+      </Link>
       <p className="mt-2 text-center text-[11px] text-muted-foreground">
-        Real-time streaming chat with wallet billing — coming in the next build.
+        After your free message, ₹{(data.rate_paise_per_min / 100).toFixed(0)} per reply.
       </p>
     </main>
   );
