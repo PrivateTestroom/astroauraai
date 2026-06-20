@@ -29,7 +29,7 @@ export const adminCreditWallet = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { data: newBal, error } = await context.supabase.rpc("wallet_admin_credit", {
-      _target_user: data.userId, _amount_paise: data.amountInr * 100, _note: data.note ?? null,
+      _target_user: data.userId, _amount_paise: data.amountInr * 100, _note: data.note ?? undefined,
     });
     if (error) throw new Error(error.message);
     return { balancePaise: newBal as number };
