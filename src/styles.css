@@ -215,3 +215,13 @@
   }
   .select:focus { border-color: var(--color-primary); }
 }
+
+body > a[href*="lovable.dev"],
+body > a[href*="gptengineer"],
+body > div[style*="2147483647"]:has(a[href*="lovable"]),
+body > div[style*="2147483647"]:has(a[href*="gptengineer"]),
+body > iframe[src*="lovable"],
+body > iframe[src*="gptengineer"] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
