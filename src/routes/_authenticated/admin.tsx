@@ -45,7 +45,8 @@ function AdminBody() {
 
   const patchAstro = useMutation({
     mutationFn: (v: Record<string, unknown> & { id: string }) =>
-      updateAstro({ data: v as Parameters<typeof updateAstro>[0]["data"] }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (updateAstro as any)({ data: v }),
     onSuccess: () => {
       toast.success("Saved");
       qc.invalidateQueries({ queryKey: ["admin-astros"] });
