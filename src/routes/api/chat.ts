@@ -3,7 +3,7 @@ import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { computeChart, STATE_COORDS, DEFAULT_COORDS } from "@/lib/astrology/engine";
+import { computeChart, resolveCoords } from "@/lib/astrology/engine";
 
 type Body = { messages?: UIMessage[]; threadId?: string };
 
@@ -65,7 +65,7 @@ export const Route = createFileRoute("/api/chat")({
         let chartCtx = "Birth details not yet provided.";
         if (p?.birth_year) {
           const [hh, mm] = (p.birth_time ?? "12:00:00").split(":").map(Number);
-          const coords = (p.state && STATE_COORDS[p.state]) || DEFAULT_COORDS;
+          const coords = resolveCoords(p.city, p.state);
           const c = computeChart({
             year: p.birth_year, month: p.birth_month!, day: p.birth_day!,
             hour: p.birth_time_known ? (hh ?? 12) : 12,

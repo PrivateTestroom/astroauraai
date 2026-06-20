@@ -21,8 +21,8 @@ function Landing() {
       <div className="flex flex-1 flex-col items-center justify-center text-center">
         <AppLogo size={120} />
         <h1 className="font-display mt-8 text-5xl font-bold leading-tight">
-          Astro<span className="text-accent">Sage</span>
-          <span className="block text-2xl font-normal text-muted-foreground">AI Astrologers, real guidance.</span>
+          Astro<span className="text-accent">Aura</span>
+          <span className="mt-2 block text-2xl font-normal text-muted-foreground">AI Astrologers, real guidance.</span>
         </h1>
         <p className="mt-6 max-w-xs text-sm text-muted-foreground">
           Vedic · KP · Hellenistic · Tarot · Numerology — synthesized by AI trained on classical systems. Your first minute is free.

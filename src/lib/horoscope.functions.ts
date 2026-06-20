@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { generateText } from "ai";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createLovableAiGatewayProvider } from "./ai-gateway.server";
-import { computeChart, STATE_COORDS, DEFAULT_COORDS } from "./astrology/engine";
+import { computeChart, resolveCoords } from "./astrology/engine";
 
 function todayIST(): string {
   const d = new Date(Date.now() + 5.5 * 3600 * 1000);
@@ -25,13 +25,13 @@ export const getDailyHoroscope = createServerFn({ method: "GET" })
 
     const { data: p } = await supabase
       .from("profiles")
-      .select("full_name,birth_year,birth_month,birth_day,birth_time,birth_time_known,state")
+      .select("full_name,birth_year,birth_month,birth_day,birth_time,birth_time_known,state,city")
       .eq("id", userId).maybeSingle();
     if (!p?.birth_year) {
       return { date, summary: "Complete your birth details to unlock your daily horoscope.", love: "", career: "", health: "", lucky: "" };
     }
     const [hh, mm] = (p.birth_time ?? "12:00:00").split(":").map(Number);
-    const coords = (p.state && STATE_COORDS[p.state]) || DEFAULT_COORDS;
+    const coords = resolveCoords(p.city, p.state);
     const chart = computeChart({
       year: p.birth_year, month: p.birth_month!, day: p.birth_day!,
       hour: p.birth_time_known ? (hh ?? 12) : 12,
