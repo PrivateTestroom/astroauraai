@@ -7,12 +7,19 @@ import { computeChart, resolveCoords } from "@/lib/astrology/engine";
 
 type Body = { messages?: UIMessage[]; threadId?: string };
 
+function jsonError(error: string, message: string, status: number) {
+  return new Response(JSON.stringify({ error, message }), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
+}
+
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const auth = request.headers.get("authorization");
-        if (!auth?.startsWith("Bearer ")) return new Response("Unauthorized", { status: 401 });
+        if (!auth?.startsWith("Bearer ")) return jsonError("unauthorized", "Please sign in again.", 401);
         const token = auth.slice(7);
 
         const supaUrl = process.env.SUPABASE_URL!;
@@ -22,18 +29,18 @@ export const Route = createFileRoute("/api/chat")({
           auth: { persistSession: false, autoRefreshToken: false },
         });
         const { data: userData, error: uerr } = await supabase.auth.getUser(token);
-        if (uerr || !userData.user) return new Response("Unauthorized", { status: 401 });
+        if (uerr || !userData.user) return jsonError("unauthorized", "Session expired. Please sign in again.", 401);
         const userId = userData.user.id;
 
         const { messages, threadId } = (await request.json()) as Body;
-        if (!threadId || !Array.isArray(messages)) return new Response("Bad request", { status: 400 });
+        if (!threadId || !Array.isArray(messages)) return jsonError("bad_request", "Invalid chat request.", 400);
 
         // Verify thread + load astrologer
         const { data: thread } = await supabase
           .from("chat_threads")
           .select("id, astrologer_id, free_consumed, astrologer:astrologers(rate_paise_per_min, system_prompt, display_name)")
           .eq("id", threadId).eq("user_id", userId).maybeSingle();
-        if (!thread) return new Response("Thread not found", { status: 404 });
+        if (!thread) return jsonError("thread_not_found", "Chat thread not found.", 404);
 
         const astro = thread.astrologer as unknown as { rate_paise_per_min: number; system_prompt: string; display_name: string };
 
@@ -44,9 +51,9 @@ export const Route = createFileRoute("/api/chat")({
           _astrologer_id: thread.astrologer_id,
           _rate_paise: astro.rate_paise_per_min,
         });
-        if (derr) return new Response(derr.message, { status: 500 });
+        if (derr) return jsonError("debit_failed", derr.message || "Wallet error.", 500);
         if (newBal === null) {
-          return new Response(JSON.stringify({ error: "insufficient_balance" }), { status: 402, headers: { "content-type": "application/json" } });
+          return jsonError("insufficient_balance", "Your free 2 minutes are over and your wallet is empty. Please top up to continue.", 402);
         }
 
         // Save the latest user message (last in array)
@@ -82,21 +89,31 @@ Lahiri ayanamsa used: ${c.ayanamsa}°`;
         }
 
         const key = process.env.LOVABLE_API_KEY;
-        if (!key) return new Response("LOVABLE_API_KEY missing", { status: 500 });
-        const gateway = createLovableAiGatewayProvider(key);
+        if (!key) return jsonError("ai_unavailable", "AI service is not configured.", 500);
 
-        const system = `${astro.system_prompt}
+        let result;
+        try {
+          const gateway = createLovableAiGatewayProvider(key);
+
+          const system = `${astro.system_prompt}
 
 You are speaking as ${astro.display_name}. Use ONLY Vedic/KP/Hellenistic/Tarot/Numerology frameworks — never western pop astrology generalities. Be warm, specific, and addictive: reference the native's actual chart facts below. Keep replies under 180 words unless the user asks for depth. Always end with one short follow-up question to keep the dialogue going.
 
 --- NATIVE'S CHART (computed server-side, treat as authoritative) ---
 ${chartCtx}`;
 
-        const result = streamText({
-          model: gateway("google/gemini-3-flash-preview"),
-          system,
-          messages: await convertToModelMessages(messages),
-        });
+          result = streamText({
+            model: gateway("google/gemini-3-flash-preview"),
+            system,
+            messages: await convertToModelMessages(messages),
+            onError: ({ error }) => {
+              console.error("[chat] streamText error", error);
+            },
+          });
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : "AI gateway error";
+          return jsonError("ai_unavailable", msg, 502);
+        }
 
         return result.toUIMessageStreamResponse({
           originalMessages: messages,
@@ -107,6 +124,10 @@ ${chartCtx}`;
                 thread_id: threadId, user_id: userId, role: "assistant", parts: assistant.parts as never,
               });
             }
+          },
+          onError: (err) => {
+            const msg = err instanceof Error ? err.message : "AI stream failed";
+            return msg;
           },
         });
       },
