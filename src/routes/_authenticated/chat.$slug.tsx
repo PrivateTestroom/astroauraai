@@ -1,0 +1,174 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
+import { useEffect, useMemo, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { ArrowLeft, Send, Sparkles, Wallet } from "lucide-react";
+import { startChatThread } from "@/lib/chat.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/_authenticated/chat/$slug")({
+  head: () => ({ meta: [{ title: "Chat — AstroAura" }] }),
+  component: ChatPage,
+});
+
+function ChatPage() {
+  const { slug } = Route.useParams();
+  const start = useServerFn(startChatThread);
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+
+  const session = useQuery({
+    queryKey: ["chat-session", slug],
+    queryFn: () => start({ data: { astrologerSlug: slug } }),
+    staleTime: 0,
+  });
+
+  if (session.isLoading) return <main className="px-6 py-10 text-center text-muted-foreground">Connecting…</main>;
+  if (session.error || !session.data) return <main className="px-6 py-10 text-center text-destructive">Could not open chat.</main>;
+
+  return <ChatBoot session={session.data} slug={slug} onBalanceRefresh={() => qc.invalidateQueries({ queryKey: ["wallet"] })} navigateBack={() => navigate({ to: "/home" })} />;
+}
+
+type Session = Awaited<ReturnType<typeof startChatThread>>;
+
+function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: Session; slug: string; onBalanceRefresh: () => void; navigateBack: () => void }) {
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [input, setInput] = useState("");
+  const [balance, setBalance] = useState(session.balancePaise);
+  const [freeConsumed, setFreeConsumed] = useState(session.freeConsumed);
+
+  const initialMessages: UIMessage[] = useMemo(
+    () => session.messages.map((m) => ({ id: m.id, role: m.role, parts: m.parts })) as UIMessage[],
+    [session.messages],
+  );
+
+  const transport = useMemo(() => new DefaultChatTransport({
+    api: "/api/chat",
+    fetch: async (url, init) => {
+      const { data } = await supabase.auth.getSession();
+      const headers = new Headers(init?.headers);
+      if (data.session) headers.set("Authorization", `Bearer ${data.session.access_token}`);
+      const body = init?.body ? JSON.parse(init.body as string) : {};
+      const res = await fetch(url, { ...init, headers, body: JSON.stringify({ ...body, threadId: session.threadId }) });
+      if (res.status === 402) {
+        toast.error("Out of balance. Please top up your wallet to continue.");
+      }
+      return res;
+    },
+  }), [session.threadId]);
+
+  const { messages, sendMessage, status } = useChat({
+    id: session.threadId,
+    messages: initialMessages,
+    transport,
+    onError: (e) => toast.error(e.message || "Chat failed"),
+    onFinish: () => {
+      onBalanceRefresh();
+      // Refresh balance from server
+      supabase.auth.getUser().then(async ({ data }) => {
+        if (!data.user) return;
+        const { data: b } = await supabase.from("wallet_balances").select("balance_paise").eq("user_id", data.user.id).maybeSingle();
+        if (b) setBalance(b.balance_paise);
+      });
+      setFreeConsumed(true);
+    },
+  });
+
+  useEffect(() => { inputRef.current?.focus(); }, []);
+  useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [messages, status]);
+
+  const isLoading = status === "submitted" || status === "streaming";
+  const ratePaise = session.astrologer.rate_paise_per_min;
+  const canSend = !isLoading && input.trim().length > 0 && (!freeConsumed ? true : balance >= ratePaise);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!canSend) return;
+    const text = input.trim();
+    setInput("");
+    await sendMessage({ text });
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }
+
+  return (
+    <main className="relative z-10 mx-auto flex h-[100dvh] max-w-md flex-col px-3 pb-3 pt-3">
+      <header className="glass flex items-center gap-3 rounded-2xl p-3">
+        <button onClick={navigateBack} className="text-muted-foreground"><ArrowLeft className="h-5 w-5" /></button>
+        <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${session.astrologer.avatar_gradient} text-xl`}>
+          {session.astrologer.avatar_emoji}
+        </div>
+        <div className="flex-1">
+          <div className="font-display font-semibold leading-tight">{session.astrologer.display_name}</div>
+          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Online · ₹{(ratePaise / 100).toFixed(0)}/min
+          </div>
+        </div>
+        <Link to="/wallet" className="flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1.5 text-[11px] font-semibold">
+          <Wallet className="h-3 w-3 text-accent" />₹{(balance / 100).toFixed(0)}
+        </Link>
+      </header>
+
+      {!freeConsumed && (
+        <div className="mt-2 flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 text-[11px] text-accent">
+          <Sparkles className="h-3 w-3" /> Your first message is free. After that ₹{(ratePaise / 100).toFixed(0)} per reply.
+        </div>
+      )}
+
+      <div ref={scrollRef} className="mt-3 flex-1 space-y-3 overflow-y-auto pb-3">
+        {messages.length === 0 && (
+          <div className="glass mt-4 rounded-2xl p-5 text-center text-sm text-muted-foreground">
+            <Sparkles className="mx-auto mb-2 h-5 w-5 text-accent" />
+            Namaste 🙏 Ask anything about your career, love, marriage, finances, or what the planets are doing for you today.
+          </div>
+        )}
+        {messages.map((m) => <Bubble key={m.id} m={m} astroEmoji={session.astrologer.avatar_emoji} />)}
+        {status === "submitted" && (
+          <div className="flex gap-2"><Typing /></div>
+        )}
+      </div>
+
+      <form onSubmit={onSubmit} className="glass flex items-end gap-2 rounded-2xl p-2">
+        <textarea
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSubmit(e as never); } }}
+          rows={1}
+          placeholder={freeConsumed && balance < ratePaise ? "Top up to continue…" : "Ask your astrologer…"}
+          className="max-h-32 flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground"
+        />
+        <button type="submit" disabled={!canSend} className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground disabled:opacity-40">
+          <Send className="h-4 w-4" />
+        </button>
+      </form>
+    </main>
+  );
+}
+
+function Bubble({ m, astroEmoji }: { m: UIMessage; astroEmoji: string }) {
+  const isUser = m.role === "user";
+  const text = m.parts.map((p) => (p.type === "text" ? (p as { text: string }).text : "")).join("");
+  return (
+    <div className={`flex gap-2 ${isUser ? "justify-end" : "justify-start"}`}>
+      {!isUser && <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/5 text-sm">{astroEmoji}</div>}
+      <div className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${isUser ? "bg-primary text-primary-foreground" : "glass text-foreground"}`}>
+        {isUser ? text : <div className="prose prose-sm prose-invert max-w-none [&_p]:my-1"><ReactMarkdown>{text}</ReactMarkdown></div>}
+      </div>
+    </div>
+  );
+}
+
+function Typing() {
+  return (
+    <div className="glass flex items-center gap-1.5 rounded-2xl px-3 py-2">
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent" style={{ animationDelay: "0ms" }} />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent" style={{ animationDelay: "120ms" }} />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent" style={{ animationDelay: "240ms" }} />
+    </div>
+  );
+}
