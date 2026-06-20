@@ -36,18 +36,32 @@ function AstrologerProfile() {
       </Link>
 
       <div className="mt-6 flex flex-col items-center text-center">
-        <div className={`flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br ${data.avatar_gradient} text-6xl shadow-xl ring-2 ring-white/10`}>
+        <div className={`relative flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br ${data.avatar_gradient} text-6xl shadow-xl ring-1 ring-accent/30`}>
           {data.avatar_emoji}
+          <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-background bg-emerald-400" />
         </div>
         <h1 className="font-display mt-4 text-3xl font-bold">{data.display_name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{data.tagline}</p>
-        <div className="mt-3 flex items-center gap-4 text-xs">
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs">
           <span className="flex items-center gap-1 text-accent">
-            <Star className="h-3 w-3 fill-current" /> {data.skill_level}/10 skill
+            <Star className="h-3 w-3 fill-current" /> {rating.toFixed(1)}{reviews ? ` (${reviews})` : ""}
+          </span>
+          <span className="flex items-center gap-1 text-muted-foreground">
+            <Award className="h-3 w-3" /> {exp} yrs
+          </span>
+          <span className="flex items-center gap-1 text-muted-foreground">
+            <LangIcon className="h-3 w-3" /> {langs.slice(0,3).join(", ")}
           </span>
           <span className="flex items-center gap-1 text-muted-foreground">
             <Clock className="h-3 w-3" /> ₹{(data.rate_paise_per_min / 100).toFixed(0)}/min
           </span>
+        </div>
+        <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+          {systems.map((s) => (
+            <span key={s} className="rounded-full border border-accent/30 px-2 py-0.5 text-[10px] uppercase tracking-wider text-accent">
+              {s === "parashara" ? "Vedic" : s === "kp" ? "KP" : "Hellenistic"}
+            </span>
+          ))}
         </div>
       </div>
 
@@ -64,9 +78,9 @@ function AstrologerProfile() {
       <Link
         to="/chat/$slug"
         params={{ slug }}
-        className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 font-semibold text-primary-foreground shadow-[0_8px_30px_-8px_rgba(168,85,247,0.7)]"
+        className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 font-semibold text-primary-foreground transition hover:brightness-110"
       >
-        <MessageCircle className="h-5 w-5" /> Start chat — 1 min free
+        <MessageCircle className="h-5 w-5" /> Start chat — {freeMin} min free
       </Link>
       <p className="mt-2 text-center text-[11px] text-muted-foreground">
         After your free message, ₹{(data.rate_paise_per_min / 100).toFixed(0)} per reply.
