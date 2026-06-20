@@ -179,7 +179,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSubmit(e as never); } }}
           rows={1}
-          placeholder={freeConsumed && balance < ratePaise ? "Top up to continue…" : "Ask your astrologer…"}
+          placeholder={!freeActive && balance < ratePaise ? "Top up to continue…" : "Ask your astrologer…"}
           className="max-h-32 flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground"
         />
         <button type="submit" disabled={!canSend} className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground disabled:opacity-40">
