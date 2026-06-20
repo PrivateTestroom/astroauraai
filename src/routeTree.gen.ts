@@ -13,7 +13,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedHoroscopeRouteImport } from './routes/_authenticated/horoscope'
@@ -40,11 +39,6 @@ const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
-  id: '/wallet',
-  path: '/wallet',
-  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
@@ -91,7 +85,6 @@ export interface FileRoutesByFullPath {
   '/horoscope': typeof AuthenticatedHoroscopeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/wallet': typeof AuthenticatedWalletRoute
   '/api/chat': typeof ApiChatRoute
   '/astrologer/$slug': typeof AuthenticatedAstrologerSlugRoute
   '/chat/$slug': typeof AuthenticatedChatSlugRoute
@@ -104,7 +97,6 @@ export interface FileRoutesByTo {
   '/horoscope': typeof AuthenticatedHoroscopeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/wallet': typeof AuthenticatedWalletRoute
   '/api/chat': typeof ApiChatRoute
   '/astrologer/$slug': typeof AuthenticatedAstrologerSlugRoute
   '/chat/$slug': typeof AuthenticatedChatSlugRoute
@@ -119,7 +111,6 @@ export interface FileRoutesById {
   '/_authenticated/horoscope': typeof AuthenticatedHoroscopeRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
-  '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/api/chat': typeof ApiChatRoute
   '/_authenticated/astrologer/$slug': typeof AuthenticatedAstrologerSlugRoute
   '/_authenticated/chat/$slug': typeof AuthenticatedChatSlugRoute
@@ -134,7 +125,6 @@ export interface FileRouteTypes {
     | '/horoscope'
     | '/onboarding'
     | '/profile'
-    | '/wallet'
     | '/api/chat'
     | '/astrologer/$slug'
     | '/chat/$slug'
@@ -147,7 +137,6 @@ export interface FileRouteTypes {
     | '/horoscope'
     | '/onboarding'
     | '/profile'
-    | '/wallet'
     | '/api/chat'
     | '/astrologer/$slug'
     | '/chat/$slug'
@@ -161,7 +150,6 @@ export interface FileRouteTypes {
     | '/_authenticated/horoscope'
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
-    | '/_authenticated/wallet'
     | '/api/chat'
     | '/_authenticated/astrologer/$slug'
     | '/_authenticated/chat/$slug'
@@ -203,13 +191,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/wallet': {
-      id: '/_authenticated/wallet'
-      path: '/wallet'
-      fullPath: '/wallet'
-      preLoaderRoute: typeof AuthenticatedWalletRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
@@ -269,7 +250,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHoroscopeRoute: typeof AuthenticatedHoroscopeRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
-  AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
   AuthenticatedAstrologerSlugRoute: typeof AuthenticatedAstrologerSlugRoute
   AuthenticatedChatSlugRoute: typeof AuthenticatedChatSlugRoute
 }
@@ -280,7 +260,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHoroscopeRoute: AuthenticatedHoroscopeRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
-  AuthenticatedWalletRoute: AuthenticatedWalletRoute,
   AuthenticatedAstrologerSlugRoute: AuthenticatedAstrologerSlugRoute,
   AuthenticatedChatSlugRoute: AuthenticatedChatSlugRoute,
 }
