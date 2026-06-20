@@ -20,7 +20,7 @@ export const startChatThread = createServerFn({ method: "POST" })
       .eq("thread_id", tid).order("created_at", { ascending: true });
 
     const { data: thread } = await supabase
-      .from("chat_threads").select("free_consumed, message_count").eq("id", tid).maybeSingle();
+      .from("chat_threads").select("free_consumed, message_count, free_started_at").eq("id", tid).maybeSingle();
 
     const { data: bal } = await supabase
       .from("wallet_balances").select("balance_paise").eq("user_id", context.userId).maybeSingle();
@@ -33,6 +33,7 @@ export const startChatThread = createServerFn({ method: "POST" })
         parts: m.parts as Array<{ type: string; text?: string }>,
       })),
       freeConsumed: !!thread?.free_consumed,
+      freeStartedAt: (thread as { free_started_at?: string | null } | null)?.free_started_at ?? null,
       balancePaise: bal?.balance_paise ?? 0,
     };
   });
