@@ -19,7 +19,7 @@ export const getDailyHoroscope = createServerFn({ method: "GET" })
       .from("horoscope_cache")
       .select("body")
       .eq("user_id", userId)
-      .eq("date_ist", date)
+      .eq("for_date", date)
       .maybeSingle();
     if (cached?.body) return { date, ...(cached.body as Record<string, string>) };
 
@@ -63,8 +63,8 @@ Return JSON ONLY with keys: summary (2-3 sentences, mystical but practical), lov
     try { body = JSON.parse(jsonStr); } catch { body = { summary: text.slice(0, 400) }; }
 
     await supabase.from("horoscope_cache").upsert({
-      user_id: userId, date_ist: date, body,
-    }, { onConflict: "user_id,date_ist" });
+      user_id: userId, for_date: date, body,
+    }, { onConflict: "user_id,for_date" });
 
     return { date, ...body };
   });
