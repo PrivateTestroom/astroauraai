@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import "../lib/fonts";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { MessageCircleQuestion } from "lucide-react";
 
 function NotFoundComponent() {
   return (
@@ -135,7 +136,20 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <SupportBadgeMask />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
+  );
+}
+
+function SupportBadgeMask() {
+  return (
+    <a
+      href="mailto:support@astroaura.ai?subject=AstroAura%20AI%20Support"
+      aria-label="Contact AstroAura support"
+      className="fixed bottom-4 right-4 z-[2147483647] flex h-12 w-12 items-center justify-center rounded-full border border-accent/30 bg-background/95 text-accent shadow-[0_10px_35px_-12px_rgba(0,0,0,0.9)] backdrop-blur transition hover:scale-105 hover:bg-secondary"
+    >
+      <MessageCircleQuestion className="h-5 w-5" />
+    </a>
   );
 }
