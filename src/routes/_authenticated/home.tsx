@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AstrologerCard, type Astrologer } from "@/components/AstrologerCard";
@@ -7,6 +7,7 @@ import { AppLogo } from "@/components/AppLogo";
 import { useProfile } from "@/lib/profile";
 import { Wallet } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({ meta: [{ title: "Astrologers — AstroAura" }] }),
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/_authenticated/home")({
 
 function HomePage() {
   const profile = useProfile();
+  const navigate = useNavigate();
   const wallet = useQuery({
     queryKey: ["wallet"],
     queryFn: async () => {
@@ -38,9 +40,18 @@ function HomePage() {
     },
   });
 
-  // gate onboarding (after all hooks)
-  if (profile.data && !profile.data.onboarded) {
-    throw redirect({ to: "/onboarding" });
+  useEffect(() => {
+    if (profile.isFetched && (!profile.data || !profile.data.onboarded)) {
+      navigate({ to: "/onboarding", replace: true });
+    }
+  }, [navigate, profile.data, profile.isFetched]);
+
+  if (profile.isLoading || (profile.isFetched && (!profile.data || !profile.data.onboarded))) {
+    return (
+      <main className="relative z-10 mx-auto flex min-h-screen max-w-md items-center justify-center px-6 text-center text-sm text-muted-foreground">
+        Preparing your chart…
+      </main>
+    );
   }
 
   const balanceInr = wallet.data ? (wallet.data.balance_paise / 100).toFixed(0) : "0";
