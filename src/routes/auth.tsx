@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -8,6 +8,13 @@ import { AppLogo } from "@/components/AppLogo";
 import { toast } from "sonner";
 
 const EXISTING_ACCOUNT_CODES = new Set(["user_already_exists", "email_exists", "phone_exists"]);
+
+function isExistingAccountError(err: { code?: string; message?: string } | null | undefined): boolean {
+  if (!err) return false;
+  if (err.code && EXISTING_ACCOUNT_CODES.has(err.code)) return true;
+  const m = (err.message || "").toLowerCase();
+  return m.includes("already registered") || m.includes("already exists") || m.includes("user already");
+}
 
 const searchSchema = z.object({
   mode: z.enum(["signin", "signup"]).default("signin"),
@@ -32,11 +39,13 @@ function AuthPage() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const submittingRef = useRef(false);
 
   useEffect(() => setMode(initialMode), [initialMode]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (submittingRef.current) return;
     if (!isValidIndianPhone(phone)) {
       toast.error("Enter a valid 10-digit Indian mobile number");
       return;
@@ -45,41 +54,24 @@ function AuthPage() {
       toast.error("Password must be at least 6 characters");
       return;
     }
+    submittingRef.current = true;
     setLoading(true);
     try {
       const normalized = normalizePhone(phone);
       const email = phoneToEmail(normalized);
       if (mode === "signup") {
-        const existing = await supabase.auth.signInWithPassword({ email, password });
-        if (!existing.error) {
-          await supabase.auth.signOut();
-          toast.error("This phone number already has an account. Please sign in instead.");
-          setMode("signin");
-          setPassword("");
-          return;
-        }
-        if (!existing.error.message.toLowerCase().includes("invalid login")) {
-          throw existing.error;
-        }
-        const { data: signUpData, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: { data: { phone: normalized, full_name: fullName || null } },
         });
         if (error) {
-          if (EXISTING_ACCOUNT_CODES.has(error.code ?? "") || error.message.toLowerCase().includes("already")) {
+          if (isExistingAccountError(error)) {
             toast.error("This phone number already has an account. Please sign in instead.");
             setMode("signin");
-            setPassword("");
             return;
           }
           throw error;
-        }
-        if (signUpData.user && Array.isArray(signUpData.user.identities) && signUpData.user.identities.length === 0) {
-          toast.error("This phone number already has an account. Please sign in instead.");
-          setMode("signin");
-          setPassword("");
-          return;
         }
         toast.success("Account created. Welcome!");
       } else {
@@ -91,6 +83,7 @@ function AuthPage() {
       const msg = err instanceof Error ? err.message : "Something went wrong";
       toast.error(msg.includes("Invalid login") ? "Wrong phone or password" : msg);
     } finally {
+      submittingRef.current = false;
       setLoading(false);
     }
   }
@@ -155,7 +148,7 @@ function AuthPage() {
         </Field>
         <Field label="Password">
           <input
-            type="password"
+            type={mode === "signup" ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="At least 6 characters"
@@ -163,6 +156,11 @@ function AuthPage() {
             autoComplete={mode === "signup" ? "new-password" : "current-password"}
             required
           />
+          {mode === "signup" && (
+            <span className="mt-1 block text-[10px] text-muted-foreground">
+              Visible so you can double-check it. Save it somewhere safe.
+            </span>
+          )}
         </Field>
 
         <button
