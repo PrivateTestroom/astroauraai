@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -135,11 +136,20 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <ScrollToTop />
       <Outlet />
       <SupportBadgeMask />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
+}
+
+function ScrollToTop() {
+  const pathname = useLocation({ select: (location) => location.pathname });
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0 });
+  }, [pathname]);
+  return null;
 }
 
 function SupportBadgeMask() {
