@@ -111,6 +111,7 @@ export type Database = {
           astrologer_id: string
           created_at: string
           free_consumed: boolean
+          free_started_at: string | null
           id: string
           last_message_at: string | null
           message_count: number
@@ -121,6 +122,7 @@ export type Database = {
           astrologer_id: string
           created_at?: string
           free_consumed?: boolean
+          free_started_at?: string | null
           id?: string
           last_message_at?: string | null
           message_count?: number
@@ -131,6 +133,7 @@ export type Database = {
           astrologer_id?: string
           created_at?: string
           free_consumed?: boolean
+          free_started_at?: string | null
           id?: string
           last_message_at?: string | null
           message_count?: number
