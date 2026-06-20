@@ -19,6 +19,7 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedHoroscopeRouteImport } from './routes/_authenticated/horoscope'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedChatSlugRouteImport } from './routes/_authenticated/chat.$slug'
 import { Route as AuthenticatedAstrologerSlugRouteImport } from './routes/_authenticated/astrologer.$slug'
 
 const AuthRoute = AuthRouteImport.update({
@@ -70,6 +71,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedChatSlugRoute = AuthenticatedChatSlugRouteImport.update({
+  id: '/chat/$slug',
+  path: '/chat/$slug',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAstrologerSlugRoute =
   AuthenticatedAstrologerSlugRouteImport.update({
     id: '/astrologer/$slug',
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/wallet': typeof AuthenticatedWalletRoute
   '/api/chat': typeof ApiChatRoute
   '/astrologer/$slug': typeof AuthenticatedAstrologerSlugRoute
+  '/chat/$slug': typeof AuthenticatedChatSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/wallet': typeof AuthenticatedWalletRoute
   '/api/chat': typeof ApiChatRoute
   '/astrologer/$slug': typeof AuthenticatedAstrologerSlugRoute
+  '/chat/$slug': typeof AuthenticatedChatSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/api/chat': typeof ApiChatRoute
   '/_authenticated/astrologer/$slug': typeof AuthenticatedAstrologerSlugRoute
+  '/_authenticated/chat/$slug': typeof AuthenticatedChatSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/api/chat'
     | '/astrologer/$slug'
+    | '/chat/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/api/chat'
     | '/astrologer/$slug'
+    | '/chat/$slug'
   id:
     | '__root__'
     | '/'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/_authenticated/wallet'
     | '/api/chat'
     | '/_authenticated/astrologer/$slug'
+    | '/_authenticated/chat/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -234,6 +246,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/chat/$slug': {
+      id: '/_authenticated/chat/$slug'
+      path: '/chat/$slug'
+      fullPath: '/chat/$slug'
+      preLoaderRoute: typeof AuthenticatedChatSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/astrologer/$slug': {
       id: '/_authenticated/astrologer/$slug'
       path: '/astrologer/$slug'
@@ -252,6 +271,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
   AuthenticatedAstrologerSlugRoute: typeof AuthenticatedAstrologerSlugRoute
+  AuthenticatedChatSlugRoute: typeof AuthenticatedChatSlugRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -262,6 +282,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRoute,
   AuthenticatedAstrologerSlugRoute: AuthenticatedAstrologerSlugRoute,
+  AuthenticatedChatSlugRoute: AuthenticatedChatSlugRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
