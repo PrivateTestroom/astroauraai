@@ -115,9 +115,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
 
   const isLoading = status === "submitted" || status === "streaming";
   const ratePaise = session.astrologer.rate_paise_per_min;
-  // FREE MODE: all chats are free for everyone right now (admin can re-enable charges later)
-  const FREE_MODE = true;
-  const canSend = !isLoading && input.trim().length > 0 && (FREE_MODE || freeActive || balance >= ratePaise);
+  const canSend = !isLoading && input.trim().length > 0 && (freeActive || balance >= ratePaise);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -146,11 +144,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
         </Link>
       </header>
 
-      {FREE_MODE ? (
-        <div className="mt-2 flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 text-[11px] text-accent">
-          <Sparkles className="h-3 w-3" /> Free chat — enjoy unlimited conversation
-        </div>
-      ) : freeActive ? (
+      {freeActive ? (
         <div className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 text-[11px] text-accent">
           <span className="flex items-center gap-1.5"><Sparkles className="h-3 w-3" /> Free trial</span>
           <span className="font-mono tabular-nums">{mm}:{ss} left · then ₹{(ratePaise / 100).toFixed(0)}/reply</span>
@@ -162,7 +156,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
         </Link>
       ) : (
         <div className="mt-2 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-muted-foreground">
-          <Sparkles className="h-3 w-3 text-accent" /> Paid mode · ₹{(ratePaise / 100).toFixed(0)} per reply
+          <Sparkles className="h-3 w-3 text-accent" /> ₹{(ratePaise / 100).toFixed(0)}/minute
         </div>
       )}
 
@@ -188,7 +182,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSubmit(e as never); } }}
           rows={1}
-          placeholder={!FREE_MODE && !freeActive && balance < ratePaise ? "Top up to continue…" : "Ask your astrologer…"}
+          placeholder={!freeActive && balance < ratePaise ? "Top up to continue…" : "Ask your astrologer…"}
           className="max-h-32 flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground"
         />
         <button type="submit" disabled={!canSend} className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground disabled:opacity-40">
