@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, MessageCircle, Star, Clock } from "lucide-react";
+import { ArrowLeft, MessageCircle, Star, Clock, Languages as LangIcon, Award } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/astrologer/$slug")({
   head: () => ({ meta: [{ title: "Astrologer — AstroAura" }] }),
@@ -21,6 +21,13 @@ function AstrologerProfile() {
 
   if (isLoading) return <main className="px-6 py-10 text-center text-muted-foreground">Loading…</main>;
   if (!data) return <main className="px-6 py-10 text-center">Astrologer not found.</main>;
+
+  const rating = (data as { rating?: number }).rating ?? 4.7;
+  const reviews = (data as { reviews_count?: number }).reviews_count ?? 0;
+  const exp = (data as { experience_years?: number }).experience_years ?? 5;
+  const langs = (data as { languages?: string[] }).languages ?? ["English","Hindi"];
+  const systems = (data as { systems?: string[] }).systems ?? ["parashara"];
+  const freeMin = (data as { free_minutes?: number }).free_minutes ?? 2;
 
   return (
     <main className="relative z-10 mx-auto max-w-md px-4 pb-12 pt-6">
