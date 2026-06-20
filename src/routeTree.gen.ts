@@ -18,7 +18,6 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedHoroscopeRouteImport } from './routes/_authenticated/horoscope'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedChatSlugRouteImport } from './routes/_authenticated/chat.$slug'
 import { Route as AuthenticatedAstrologerSlugRouteImport } from './routes/_authenticated/astrologer.$slug'
 
@@ -66,11 +65,6 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedChatSlugRoute = AuthenticatedChatSlugRouteImport.update({
   id: '/chat/$slug',
   path: '/chat/$slug',
@@ -86,7 +80,6 @@ const AuthenticatedAstrologerSlugRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/home': typeof AuthenticatedHomeRoute
   '/horoscope': typeof AuthenticatedHoroscopeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
@@ -99,7 +92,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/home': typeof AuthenticatedHomeRoute
   '/horoscope': typeof AuthenticatedHoroscopeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
@@ -114,7 +106,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/horoscope': typeof AuthenticatedHoroscopeRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
@@ -129,7 +120,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/admin'
     | '/home'
     | '/horoscope'
     | '/onboarding'
@@ -142,7 +132,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
-    | '/admin'
     | '/home'
     | '/horoscope'
     | '/onboarding'
@@ -156,7 +145,6 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/_authenticated/admin'
     | '/_authenticated/home'
     | '/_authenticated/horoscope'
     | '/_authenticated/onboarding'
@@ -239,13 +227,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/chat/$slug': {
       id: '/_authenticated/chat/$slug'
       path: '/chat/$slug'
@@ -264,7 +245,6 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedHoroscopeRoute: typeof AuthenticatedHoroscopeRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
@@ -275,7 +255,6 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedHoroscopeRoute: AuthenticatedHoroscopeRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
