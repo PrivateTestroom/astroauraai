@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -14,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import "../lib/fonts";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { MessageCircleQuestion } from "lucide-react";
 
 function NotFoundComponent() {
   return (
@@ -134,8 +136,30 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <ScrollToTop />
       <Outlet />
+      <SupportBadgeMask />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
+  );
+}
+
+function ScrollToTop() {
+  const pathname = useLocation({ select: (location) => location.pathname });
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0 });
+  }, [pathname]);
+  return null;
+}
+
+function SupportBadgeMask() {
+  return (
+    <a
+      href="mailto:support@astroaura.ai?subject=AstroAura%20AI%20Support"
+      aria-label="Contact AstroAura support"
+      className="fixed bottom-4 right-4 z-[2147483647] flex h-12 w-12 items-center justify-center rounded-full border border-accent/30 bg-background/95 text-accent shadow-[0_10px_35px_-12px_rgba(0,0,0,0.9)] backdrop-blur transition hover:scale-105 hover:bg-secondary"
+    >
+      <MessageCircleQuestion className="h-5 w-5" />
+    </a>
   );
 }
