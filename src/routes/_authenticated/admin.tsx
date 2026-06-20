@@ -89,7 +89,22 @@ function AdminBody() {
       <section className="mt-8">
         <h2 className="font-display mb-3 text-sm font-semibold text-accent">Astrologers</h2>
         <div className="space-y-2">
-          {astros.data?.map((a) => <AstrologerEditor key={a.id} a={a} patch={(v) => patchAstro.mutate({ id: a.id, ...v })} />)}
+          {astros.data?.map((a) => (
+            <AstrologerEditor
+              key={a.id}
+              a={{
+                id: a.id, slug: a.slug, display_name: a.display_name,
+                rate_paise_per_min: a.rate_paise_per_min,
+                free_minutes: (a as { free_minutes?: number }).free_minutes ?? 2,
+                is_active: a.is_active, is_recommended: a.is_recommended,
+                systems: ((a as { systems?: string[] }).systems ?? []) as ("parashara"|"kp"|"hellenistic")[],
+                languages: (a as { languages?: string[] }).languages ?? [],
+                specialties: (a as { specialties?: string[] }).specialties ?? [],
+                bio: (a as { bio?: string | null }).bio ?? null,
+              }}
+              patch={(v) => patchAstro.mutate({ id: a.id, ...v })}
+            />
+          ))}
         </div>
       </section>
 
