@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import { generateText } from "ai";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+import { generateTextWithFallback } from "./gemini.server";
 import { computeChart, resolveCoords } from "./astrology/engine";
 
 function todayIST(): string {
@@ -39,10 +38,6 @@ export const getDailyHoroscope = createServerFn({ method: "GET" })
       lat: coords.lat, lon: coords.lon, timeKnown: !!p.birth_time_known,
     });
 
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY missing");
-    const gateway = createLovableAiGatewayProvider(key);
-
     const prompt = `You are a senior Vedic + KP + Hellenistic astrologer giving a real personalized horoscope for ${date} (IST).
 
 Native: ${p.full_name ?? "the seeker"}
@@ -54,10 +49,7 @@ Hellenistic sect: ${chart.hellenistic.sect}
 
 Return JSON ONLY with keys: summary (2-3 sentences, mystical but practical), love (1 sentence), career (1 sentence), health (1 sentence), lucky (e.g. "Color: Red · Number: 7 · Time: 4–6 PM"). No markdown, no commentary, just the JSON.`;
 
-    const { text } = await generateText({
-      model: gateway("google/gemini-3-flash-preview"),
-      prompt,
-    });
+    const { text } = await generateTextWithFallback({ prompt });
     const jsonStr = text.match(/\{[\s\S]*\}/)?.[0] ?? "{}";
     let body: Record<string, string> = {};
     try { body = JSON.parse(jsonStr); } catch { body = { summary: text.slice(0, 400) }; }
