@@ -52,8 +52,10 @@ function AuthPage() {
       if (mode === "signup") {
         const existing = await supabase.auth.signInWithPassword({ email, password });
         if (!existing.error) {
-          toast.info("This account already exists. You are signed in now.");
-          navigate({ to: "/home" });
+          await supabase.auth.signOut();
+          toast.error("This phone number already has an account. Please sign in instead.");
+          setMode("signin");
+          setPassword("");
           return;
         }
         if (!existing.error.message.toLowerCase().includes("invalid login")) {
