@@ -44,18 +44,8 @@ function AdminBody() {
   });
 
   const patchAstro = useMutation({
-    mutationFn: (v: {
-      id: string;
-      rate_paise_per_min?: number;
-      free_minutes?: number;
-      is_active?: boolean;
-      is_recommended?: boolean;
-      systems?: ("parashara" | "kp" | "hellenistic")[];
-      languages?: string[];
-      specialties?: string[];
-      bio?: string;
-    }) =>
-      updateAstro({ data: v }),
+    mutationFn: (v: Record<string, unknown> & { id: string }) =>
+      updateAstro({ data: v as Parameters<typeof updateAstro>[0]["data"] }),
     onSuccess: () => {
       toast.success("Saved");
       qc.invalidateQueries({ queryKey: ["admin-astros"] });
