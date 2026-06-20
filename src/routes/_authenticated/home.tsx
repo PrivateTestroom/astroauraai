@@ -8,6 +8,7 @@ import { useProfile } from "@/lib/profile";
 import { Wallet } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { CosmicLoader } from "@/components/CosmicLoader";
 
 export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({ meta: [{ title: "Astrologers — AstroAura" }] }),
@@ -48,8 +49,8 @@ function HomePage() {
 
   if (profile.isLoading || (profile.isFetched && (!profile.data || !profile.data.onboarded))) {
     return (
-      <main className="relative z-10 mx-auto flex min-h-screen max-w-md items-center justify-center px-6 text-center text-sm text-muted-foreground">
-        Preparing your chart…
+      <main className="relative z-10 mx-auto flex min-h-screen max-w-md items-center justify-center px-6">
+        <CosmicLoader label="Aligning the sky…" />
       </main>
     );
   }
@@ -78,18 +79,18 @@ function HomePage() {
 
       <div className="gold-divider mt-5" />
 
-      <section className="mt-6 grid grid-cols-3 gap-2 text-center">
-        <Link to="/horoscope" className="glass rounded-2xl p-3">
+      <section className="mt-7 grid grid-cols-3 gap-3 text-center">
+        <Link to="/horoscope" className="glass rounded-2xl p-4">
           <div className="text-2xl">☀️</div>
-          <div className="font-display mt-1 text-[11px]">Horoscope</div>
+          <div className="font-display mt-1.5 text-[12px] tracking-wide">Horoscope</div>
         </Link>
-        <Link to="/kundli" className="glass rounded-2xl p-3">
+        <Link to="/kundli" className="glass rounded-2xl p-4">
           <div className="text-2xl">🪐</div>
-          <div className="font-display mt-1 text-[11px]">Kundli</div>
+          <div className="font-display mt-1.5 text-[12px] tracking-wide">Kundli</div>
         </Link>
-        <Link to="/match" className="glass rounded-2xl p-3">
+        <Link to="/match" className="glass rounded-2xl p-4">
           <div className="text-2xl">💞</div>
-          <div className="font-display mt-1 text-[11px]">Matching</div>
+          <div className="font-display mt-1.5 text-[12px] tracking-wide">Matching</div>
         </Link>
       </section>
 
@@ -109,22 +110,22 @@ function HomePage() {
       )}
 
       {recommended.length > 0 && (
-        <section className="mt-8">
-          <h2 className="font-display mb-3 flex items-center gap-2 text-sm font-semibold text-accent">
+        <section className="mt-10">
+          <h2 className="font-display mb-4 flex items-center gap-2 text-sm font-semibold text-accent">
             <span className="h-px w-6 bg-accent/40" /> Featured astrologers
           </h2>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {recommended.map((a) => <AstrologerCard key={a.id} a={a} />)}
           </div>
         </section>
       )}
 
       {others.length > 0 && (
-        <section className="mt-8">
-          <h2 className="font-display mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+        <section className="mt-10">
+          <h2 className="font-display mb-4 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
             <span className="h-px w-6 bg-white/20" /> All astrologers
           </h2>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {others.map((a) => <AstrologerCard key={a.id} a={a} />)}
           </div>
         </section>

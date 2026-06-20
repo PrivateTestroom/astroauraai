@@ -6,6 +6,7 @@ import { PanchangWidget } from "@/components/PanchangWidget";
 import { getDailyHoroscope } from "@/lib/horoscope.functions";
 import { getMyChart } from "@/lib/chart.functions";
 import { Sparkles, Heart, Briefcase, Activity, Star } from "lucide-react";
+import { CosmicLoader } from "@/components/CosmicLoader";
 
 export const Route = createFileRoute("/_authenticated/horoscope")({
   head: () => ({ meta: [{ title: "Daily Horoscope — AstroAura" }] }),
@@ -35,8 +36,13 @@ function HoroscopePage() {
       )}
 
       {horoscope.isLoading && (
-        <div className="glass mt-6 rounded-2xl p-6 text-center text-sm text-muted-foreground">
-          <Sparkles className="mx-auto mb-2 h-6 w-6 animate-pulse text-accent" /> Consulting the stars…
+        <div className="glass mt-6 rounded-2xl p-6">
+          <CosmicLoader label="Reading today's transits…" />
+        </div>
+      )}
+      {horoscope.isError && (
+        <div className="glass mt-6 rounded-2xl p-5 text-center text-sm text-muted-foreground">
+          Couldn't read the sky right now. Pull to refresh in a moment.
         </div>
       )}
 

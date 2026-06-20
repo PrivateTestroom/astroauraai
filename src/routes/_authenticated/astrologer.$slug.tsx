@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, MessageCircle, Star, Clock, Languages as LangIcon, Award } from "lucide-react";
+import { ArrowLeft, MessageCircle, Clock, Languages as LangIcon, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/astrologer/$slug")({
   head: () => ({ meta: [{ title: "Astrologer — AstroAura" }] }),
@@ -22,9 +22,6 @@ function AstrologerProfile() {
   if (isLoading) return <main className="px-6 py-10 text-center text-muted-foreground">Loading…</main>;
   if (!data) return <main className="px-6 py-10 text-center">Astrologer not found.</main>;
 
-  const rating = (data as { rating?: number }).rating ?? 4.7;
-  const reviews = (data as { reviews_count?: number }).reviews_count ?? 0;
-  const exp = (data as { experience_years?: number }).experience_years ?? 5;
   const langs = (data as { languages?: string[] }).languages ?? ["English","Hindi"];
   const systems = (data as { systems?: string[] }).systems ?? ["parashara"];
   const freeMin = (data as { free_minutes?: number }).free_minutes ?? 2;
@@ -43,11 +40,8 @@ function AstrologerProfile() {
         <h1 className="font-display mt-4 text-3xl font-bold">{data.display_name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{data.tagline}</p>
         <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs">
-          <span className="flex items-center gap-1 text-accent">
-            <Star className="h-3 w-3 fill-current" /> {rating.toFixed(1)}{reviews ? ` (${reviews})` : ""}
-          </span>
           <span className="flex items-center gap-1 text-muted-foreground">
-            <Award className="h-3 w-3" /> {exp} yrs
+            <BookOpen className="h-3 w-3" /> Trained in {systems.length} system{systems.length>1?"s":""}
           </span>
           <span className="flex items-center gap-1 text-muted-foreground">
             <LangIcon className="h-3 w-3" /> {langs.slice(0,3).join(", ")}

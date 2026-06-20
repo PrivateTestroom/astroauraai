@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { ArrowLeft, Send, Sparkles, Wallet } from "lucide-react";
 import { startChatThread } from "@/lib/chat.functions";
+import { CosmicLoader } from "@/components/CosmicLoader";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -27,7 +28,7 @@ function ChatPage() {
     staleTime: 0,
   });
 
-  if (session.isLoading) return <main className="px-6 py-10 text-center text-muted-foreground">Connecting…</main>;
+  if (session.isLoading) return <main className="px-6 py-10"><CosmicLoader label="Opening the consultation…" /></main>;
   if (session.error || !session.data) return <main className="px-6 py-10 text-center text-destructive">Could not open chat.</main>;
 
   return <ChatBoot session={session.data} slug={slug} onBalanceRefresh={() => qc.invalidateQueries({ queryKey: ["wallet"] })} navigateBack={() => navigate({ to: "/home" })} />;
@@ -161,9 +162,11 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
 
       <div ref={scrollRef} className="mt-3 flex-1 space-y-3 overflow-y-auto pb-3">
         {messages.length === 0 && (
-          <div className="glass mt-4 rounded-2xl p-5 text-center text-sm text-muted-foreground">
-            <Sparkles className="mx-auto mb-2 h-5 w-5 text-accent" />
-            Namaste 🙏 Ask anything about your career, love, marriage, finances, or what the planets are doing for you today.
+          <div className="glass mt-4 rounded-2xl p-5 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-accent"><Sparkles className="h-4 w-4" /> <span className="font-display text-base text-foreground">Namaste 🙏</span></div>
+            <p className="mt-2 leading-relaxed">
+              Share what's on your mind — career, love, marriage, a decision you're weighing, or a name/date you want me to read against your chart. Specific questions give the sharpest answers.
+            </p>
           </div>
         )}
         {messages.map((m) => <Bubble key={m.id} m={m} astroEmoji={session.astrologer.avatar_emoji} />)}

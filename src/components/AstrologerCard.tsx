@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Star, Sparkles, Languages as LangIcon } from "lucide-react";
+import { Sparkles, Languages as LangIcon } from "lucide-react";
 
 export type Astrologer = {
   id: string;
@@ -23,12 +23,11 @@ export type Astrologer = {
 
 export function AstrologerCard({ a }: { a: Astrologer }) {
   const rateInr = (a.rate_paise_per_min / 100).toFixed(0);
-  const rating = a.rating ?? 4.7;
   return (
     <Link
       to="/astrologer/$slug"
       params={{ slug: a.slug }}
-      className="group glass relative flex items-center gap-4 rounded-2xl p-4 transition hover:-translate-y-0.5 hover:border-accent/40"
+      className="group glass relative flex items-center gap-4 rounded-2xl p-5 transition hover:-translate-y-0.5 hover:border-accent/40"
     >
       {a.is_recommended && (
         <span className="absolute -top-2 left-4 inline-flex items-center gap-1 rounded-full border border-accent/40 bg-background px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-accent">
@@ -43,22 +42,16 @@ export function AstrologerCard({ a }: { a: Astrologer }) {
         <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-background bg-emerald-400" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <h3 className="font-display truncate text-lg font-semibold">{a.display_name}</h3>
-        </div>
-        <div className="mt-0.5 flex items-center gap-2 text-[10.5px] text-muted-foreground">
-          <span className="flex items-center gap-0.5 text-accent">
-            <Star className="h-3 w-3 fill-current" /> {rating.toFixed(1)}
-          </span>
-          {a.experience_years ? <span>· {a.experience_years} yrs</span> : null}
-          {a.languages?.length ? (
-            <span className="flex items-center gap-0.5"><LangIcon className="h-3 w-3" /> {a.languages.slice(0,2).join(", ")}</span>
-          ) : null}
-        </div>
-        <p className="mt-0.5 truncate text-xs text-muted-foreground/80">{a.tagline}</p>
-        <div className="mt-1.5 flex flex-wrap gap-1">
+        <h3 className="font-display truncate text-lg font-semibold leading-tight">{a.display_name}</h3>
+        <p className="mt-1 truncate text-xs text-muted-foreground/90">{a.tagline}</p>
+        {a.languages?.length ? (
+          <div className="mt-1.5 flex items-center gap-1 text-[10.5px] text-muted-foreground">
+            <LangIcon className="h-3 w-3" /> {a.languages.slice(0,3).join(" · ")}
+          </div>
+        ) : null}
+        <div className="mt-2 flex flex-wrap gap-1">
           {(a.specialties ?? []).slice(0, 3).map((s) => (
-            <span key={s} className="rounded-full border border-white/8 bg-white/3 px-2 py-0.5 text-[10px] text-muted-foreground">
+            <span key={s} className="rounded-full border border-accent/15 bg-accent/5 px-2 py-0.5 text-[10px] text-accent/90">
               {s}
             </span>
           ))}
