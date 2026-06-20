@@ -134,6 +134,7 @@ export type Database = {
           free_consumed: boolean
           free_started_at: string | null
           id: string
+          last_charge_at: string | null
           last_message_at: string | null
           message_count: number
           title: string | null
@@ -145,6 +146,7 @@ export type Database = {
           free_consumed?: boolean
           free_started_at?: string | null
           id?: string
+          last_charge_at?: string | null
           last_message_at?: string | null
           message_count?: number
           title?: string | null
@@ -156,6 +158,7 @@ export type Database = {
           free_consumed?: boolean
           free_started_at?: string | null
           id?: string
+          last_charge_at?: string | null
           last_message_at?: string | null
           message_count?: number
           title?: string | null
