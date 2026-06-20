@@ -15,6 +15,7 @@
     "@ai-sdk/google": "^3.0.83",
     "@ai-sdk/openai-compatible": "^2.0.51",
     "@ai-sdk/react": "^3.0.210",
+    "@fontsource/cormorant-garamond": "^5.2.11",
     "@fontsource/fraunces": "^5.2.9",
     "@fontsource/inter": "^5.2.8",
     "@hookform/resolvers": "^5.2.2",

@@ -5,7 +5,7 @@ import { useIsAdmin } from "@/lib/profile";
 import {
   adminGetStats, adminListUsers, adminCreditWallet, adminListAstrologers, adminUpdateAstrologer,
 } from "@/lib/admin.functions";
-import { ArrowLeft, Users, Wallet, MessageSquare, Sparkles, Plus } from "lucide-react";
+import { ArrowLeft, Users, Wallet, MessageSquare, Sparkles, Plus, Settings2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -44,9 +44,13 @@ function AdminBody() {
   });
 
   const patchAstro = useMutation({
-    mutationFn: (v: { id: string; rate_paise_per_min?: number; is_active?: boolean; is_recommended?: boolean }) =>
-      updateAstro({ data: v }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-astros"] }),
+    mutationFn: (v: Record<string, unknown> & { id: string }) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (updateAstro as any)({ data: v }),
+    onSuccess: () => {
+      toast.success("Saved");
+      qc.invalidateQueries({ queryKey: ["admin-astros"] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -77,34 +81,20 @@ function AdminBody() {
         <h2 className="font-display mb-3 text-sm font-semibold text-accent">Astrologers</h2>
         <div className="space-y-2">
           {astros.data?.map((a) => (
-            <div key={a.id} className="glass rounded-xl p-3 text-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-semibold">{a.display_name}</div>
-                  <div className="text-[10px] text-muted-foreground">{a.slug}</div>
-                </div>
-                <input
-                  type="number"
-                  defaultValue={a.rate_paise_per_min / 100}
-                  className="w-20 rounded-md border border-white/10 bg-white/5 px-2 py-1 text-right text-sm"
-                  onBlur={(e) => {
-                    const v = Math.max(1, Number(e.target.value));
-                    if (v * 100 !== a.rate_paise_per_min) patchAstro.mutate({ id: a.id, rate_paise_per_min: v * 100 });
-                  }}
-                />
-                <span className="ml-1 text-[10px] text-muted-foreground">₹/min</span>
-              </div>
-              <div className="mt-2 flex items-center gap-3 text-[11px]">
-                <label className="flex items-center gap-1">
-                  <input type="checkbox" defaultChecked={a.is_active}
-                    onChange={(e) => patchAstro.mutate({ id: a.id, is_active: e.target.checked })} /> Active
-                </label>
-                <label className="flex items-center gap-1">
-                  <input type="checkbox" defaultChecked={a.is_recommended}
-                    onChange={(e) => patchAstro.mutate({ id: a.id, is_recommended: e.target.checked })} /> Recommended
-                </label>
-              </div>
-            </div>
+            <AstrologerEditor
+              key={a.id}
+              a={{
+                id: a.id, slug: a.slug, display_name: a.display_name,
+                rate_paise_per_min: a.rate_paise_per_min,
+                free_minutes: (a as { free_minutes?: number }).free_minutes ?? 2,
+                is_active: a.is_active, is_recommended: a.is_recommended,
+                systems: ((a as { systems?: string[] }).systems ?? []) as ("parashara"|"kp"|"hellenistic")[],
+                languages: (a as { languages?: string[] }).languages ?? [],
+                specialties: (a as { specialties?: string[] }).specialties ?? [],
+                bio: (a as { bio?: string | null }).bio ?? null,
+              }}
+              patch={(v) => patchAstro.mutate({ id: a.id, ...v })}
+            />
           ))}
         </div>
       </section>
@@ -113,6 +103,109 @@ function AdminBody() {
         Payment gateway integration is next — you'll choose the provider.
       </p>
     </main>
+  );
+}
+
+type AdminAstroRow = {
+  id: string; slug: string; display_name: string;
+  rate_paise_per_min: number; free_minutes: number;
+  is_active: boolean; is_recommended: boolean;
+  systems: string[]; languages: string[]; specialties: string[];
+  bio: string | null;
+};
+
+function AstrologerEditor({ a, patch }: { a: AdminAstroRow; patch: (v: Partial<AdminAstroRow>) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="glass rounded-xl p-3 text-sm">
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="font-semibold">{a.display_name}</div>
+          <div className="text-[10px] text-muted-foreground">{a.slug}</div>
+        </div>
+        <button onClick={() => setOpen((v) => !v)} className="rounded-md bg-white/10 px-2 py-1 text-[11px]">
+          <Settings2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      <div className="mt-2 flex items-center gap-2 text-[11px]">
+        <label className="flex items-center gap-1">₹
+          <input type="number" defaultValue={a.rate_paise_per_min / 100}
+            className="w-16 rounded-md border border-white/10 bg-white/5 px-2 py-1 text-right"
+            onBlur={(e) => {
+              const v = Math.max(1, Number(e.target.value));
+              if (v * 100 !== a.rate_paise_per_min) patch({ rate_paise_per_min: v * 100 });
+            }} />/min
+        </label>
+        <label className="flex items-center gap-1">Free
+          <input type="number" min={0} max={60} defaultValue={a.free_minutes}
+            className="w-12 rounded-md border border-white/10 bg-white/5 px-2 py-1 text-right"
+            onBlur={(e) => {
+              const v = Math.max(0, Math.min(60, Number(e.target.value)));
+              if (v !== a.free_minutes) patch({ free_minutes: v });
+            }} /> min
+        </label>
+        <label className="flex items-center gap-1"><input type="checkbox" defaultChecked={a.is_active}
+          onChange={(e) => patch({ is_active: e.target.checked })} /> Active</label>
+        <label className="flex items-center gap-1"><input type="checkbox" defaultChecked={a.is_recommended}
+          onChange={(e) => patch({ is_recommended: e.target.checked })} /> Rec</label>
+      </div>
+      {open && (
+        <div className="mt-3 space-y-2 border-t border-white/10 pt-3 text-[11px]">
+          <div>
+            <div className="mb-1 text-muted-foreground">Systems</div>
+            <div className="flex flex-wrap gap-1.5">
+              {(["parashara","kp","hellenistic"] as const).map((s) => {
+                const on = a.systems?.includes(s);
+                return (
+                  <button key={s}
+                    onClick={() => {
+                      const next = on ? a.systems.filter((x) => x !== s) : [...(a.systems ?? []), s];
+                      patch({ systems: next as ("parashara"|"kp"|"hellenistic")[] });
+                    }}
+                    className={`rounded-full px-2 py-0.5 ${on ? "bg-accent text-accent-foreground" : "bg-white/5 text-muted-foreground"}`}>
+                    {s}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <TagEditor label="Languages" tags={a.languages ?? []} onChange={(t) => patch({ languages: t })} />
+          <TagEditor label="Specialties" tags={a.specialties ?? []} onChange={(t) => patch({ specialties: t })} />
+          <div>
+            <div className="mb-1 text-muted-foreground">Bio</div>
+            <textarea defaultValue={a.bio ?? ""} rows={3}
+              className="w-full rounded-md border border-white/10 bg-white/5 p-2 text-[11px]"
+              onBlur={(e) => { if (e.target.value !== (a.bio ?? "")) patch({ bio: e.target.value }); }} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TagEditor({ label, tags, onChange }: { label: string; tags: string[]; onChange: (t: string[]) => void }) {
+  const [val, setVal] = useState("");
+  return (
+    <div>
+      <div className="mb-1 text-muted-foreground">{label}</div>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {tags.map((t) => (
+          <span key={t} className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5">
+            {t}
+            <button onClick={() => onChange(tags.filter((x) => x !== t))} className="text-muted-foreground">×</button>
+          </span>
+        ))}
+        <input value={val} onChange={(e) => setVal(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && val.trim()) {
+              e.preventDefault();
+              onChange([...tags, val.trim()]);
+              setVal("");
+            }
+          }}
+          placeholder="add…" className="w-20 rounded-md border border-white/10 bg-transparent px-2 py-0.5" />
+      </div>
+    </div>
   );
 }
 

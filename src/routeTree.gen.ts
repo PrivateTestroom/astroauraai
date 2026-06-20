@@ -16,6 +16,8 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedMatchRouteImport } from './routes/_authenticated/match'
+import { Route as AuthenticatedKundliRouteImport } from './routes/_authenticated/kundli'
 import { Route as AuthenticatedHoroscopeRouteImport } from './routes/_authenticated/horoscope'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -56,6 +58,16 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMatchRoute = AuthenticatedMatchRouteImport.update({
+  id: '/match',
+  path: '/match',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedKundliRoute = AuthenticatedKundliRouteImport.update({
+  id: '/kundli',
+  path: '/kundli',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedHoroscopeRoute = AuthenticatedHoroscopeRouteImport.update({
   id: '/horoscope',
   path: '/horoscope',
@@ -89,6 +101,8 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/home': typeof AuthenticatedHomeRoute
   '/horoscope': typeof AuthenticatedHoroscopeRoute
+  '/kundli': typeof AuthenticatedKundliRoute
+  '/match': typeof AuthenticatedMatchRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/wallet': typeof AuthenticatedWalletRoute
@@ -102,6 +116,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/home': typeof AuthenticatedHomeRoute
   '/horoscope': typeof AuthenticatedHoroscopeRoute
+  '/kundli': typeof AuthenticatedKundliRoute
+  '/match': typeof AuthenticatedMatchRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/wallet': typeof AuthenticatedWalletRoute
@@ -117,6 +133,8 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/horoscope': typeof AuthenticatedHoroscopeRoute
+  '/_authenticated/kundli': typeof AuthenticatedKundliRoute
+  '/_authenticated/match': typeof AuthenticatedMatchRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
@@ -132,6 +150,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/home'
     | '/horoscope'
+    | '/kundli'
+    | '/match'
     | '/onboarding'
     | '/profile'
     | '/wallet'
@@ -145,6 +165,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/home'
     | '/horoscope'
+    | '/kundli'
+    | '/match'
     | '/onboarding'
     | '/profile'
     | '/wallet'
@@ -159,6 +181,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/home'
     | '/_authenticated/horoscope'
+    | '/_authenticated/kundli'
+    | '/_authenticated/match'
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
     | '/_authenticated/wallet'
@@ -225,6 +249,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/match': {
+      id: '/_authenticated/match'
+      path: '/match'
+      fullPath: '/match'
+      preLoaderRoute: typeof AuthenticatedMatchRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/kundli': {
+      id: '/_authenticated/kundli'
+      path: '/kundli'
+      fullPath: '/kundli'
+      preLoaderRoute: typeof AuthenticatedKundliRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/horoscope': {
       id: '/_authenticated/horoscope'
       path: '/horoscope'
@@ -267,6 +305,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedHoroscopeRoute: typeof AuthenticatedHoroscopeRoute
+  AuthenticatedKundliRoute: typeof AuthenticatedKundliRoute
+  AuthenticatedMatchRoute: typeof AuthenticatedMatchRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
@@ -278,6 +318,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedHoroscopeRoute: AuthenticatedHoroscopeRoute,
+  AuthenticatedKundliRoute: AuthenticatedKundliRoute,
+  AuthenticatedMatchRoute: AuthenticatedMatchRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRoute,
@@ -297,13 +339,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

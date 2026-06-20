@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { BottomNav } from "@/components/BottomNav";
+import { PanchangWidget } from "@/components/PanchangWidget";
 import { getDailyHoroscope } from "@/lib/horoscope.functions";
 import { getMyChart } from "@/lib/chart.functions";
 import { Sparkles, Heart, Briefcase, Activity, Star } from "lucide-react";
@@ -22,6 +23,8 @@ function HoroscopePage() {
     <main className="relative z-10 mx-auto max-w-md px-4 pb-28 pt-8">
       <div className="text-xs uppercase tracking-widest text-accent">{today}</div>
       <h1 className="font-display mt-1 text-3xl font-bold">Your horoscope</h1>
+
+      <PanchangWidget />
 
       {chart.data && (
         <section className="glass mt-5 grid grid-cols-3 gap-2 rounded-2xl p-4 text-center">

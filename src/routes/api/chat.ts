@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { type UIMessage } from "ai";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { computeChart, resolveCoords } from "@/lib/astrology/engine";
+import { resolveCoords } from "@/lib/astrology/engine";
+import { buildAstrologyContext, bundleToPrompt, type AstroSystem } from "@/lib/ai/astrology-context";
 import { streamChatWithFallback } from "@/lib/gemini.server";
 
 type Body = { messages?: UIMessage[]; threadId?: string };
@@ -38,11 +39,17 @@ export const Route = createFileRoute("/api/chat")({
         // Verify thread + load astrologer
         const { data: thread } = await supabase
           .from("chat_threads")
-          .select("id, astrologer_id, free_consumed, astrologer:astrologers(rate_paise_per_min, system_prompt, display_name)")
+          .select("id, astrologer_id, free_consumed, astrologer:astrologers(rate_paise_per_min, system_prompt, display_name, systems, specialties, languages, free_minutes)")
           .eq("id", threadId).eq("user_id", userId).maybeSingle();
         if (!thread) return jsonError("thread_not_found", "Chat thread not found.", 404);
 
-        const astro = thread.astrologer as unknown as { rate_paise_per_min: number; system_prompt: string; display_name: string };
+        const astro = thread.astrologer as unknown as {
+          rate_paise_per_min: number; system_prompt: string; display_name: string;
+          systems?: string[]; specialties?: string[]; languages?: string[]; free_minutes?: number;
+        };
+        const systems: AstroSystem[] = ((astro.systems?.length ? astro.systems : ["parashara"]) as string[])
+          .filter((s): s is AstroSystem => s === "parashara" || s === "kp" || s === "hellenistic");
+        const freeMinutes = astro.free_minutes ?? 2;
 
         // Debit (free first message, then per-minute rate per user message)
         const { data: newBal, error: derr } = await supabase.rpc("wallet_debit_for_chat", {
@@ -53,7 +60,7 @@ export const Route = createFileRoute("/api/chat")({
         });
         if (derr) return jsonError("debit_failed", derr.message || "Wallet error.", 500);
         if (newBal === null) {
-          return jsonError("insufficient_balance", "Your free 2 minutes are over and your wallet is empty. Please top up to continue.", 402);
+          return jsonError("insufficient_balance", `Your free ${freeMinutes} minute${freeMinutes === 1 ? "" : "s"} are over and your wallet is empty. Please top up to continue.`, 402);
         }
 
         // Save the latest user message (last in array)
@@ -69,32 +76,37 @@ export const Route = createFileRoute("/api/chat")({
           .select("full_name,gender,birth_year,birth_month,birth_day,birth_time,birth_time_known,state,city")
           .eq("id", userId).maybeSingle();
 
-        let chartCtx = "Birth details not yet provided.";
+        let chartCtx = "Birth details not yet provided. Ask the seeker politely for their date, time (if known), and place of birth so you can read their chart accurately.";
         if (p?.birth_year) {
           const [hh, mm] = (p.birth_time ?? "12:00:00").split(":").map(Number);
           const coords = resolveCoords(p.city, p.state);
-          const c = computeChart({
+          const bundle = buildAstrologyContext({
             year: p.birth_year, month: p.birth_month!, day: p.birth_day!,
             hour: p.birth_time_known ? (hh ?? 12) : 12,
             minute: p.birth_time_known ? (mm ?? 0) : 0,
             lat: coords.lat, lon: coords.lon, timeKnown: !!p.birth_time_known,
-          });
-          chartCtx = `Native: ${p.full_name ?? ""} (${p.gender ?? "n/a"}), born ${p.birth_day}/${p.birth_month}/${p.birth_year}${p.birth_time_known ? ` ${p.birth_time}` : " (time unknown)"} in ${p.state ?? "India"}.
-Moon Sign (Rashi): ${c.moonRashi.sanskrit} / ${c.moonRashi.name}
-Sun Sign: ${c.sunRashi.sanskrit}
-Nakshatra: ${c.nakshatra.name}, pada ${c.nakshatra.pada}, lord ${c.nakshatra.lord}, KP sub-lord ${c.nakshatra.subLord}
-Ascendant (Lagna): ${c.ascendant?.sanskrit ?? "unknown (birth time missing)"}
-Hellenistic sect: ${c.hellenistic.sect}, Lot of Fortune in: ${c.hellenistic.lotOfFortune ?? "n/a"}
-Lahiri ayanamsa used: ${c.ayanamsa}°`;
+          }, systems);
+          chartCtx = `Native: ${p.full_name ?? ""} (${p.gender ?? "n/a"}), born ${p.birth_day}/${p.birth_month}/${p.birth_year}${p.birth_time_known ? ` ${p.birth_time}` : " (time unknown)"} in ${p.state ?? "India"}.\n\n${bundleToPrompt(bundle, systems)}`;
         }
 
         let result;
         try {
+          const sysList = systems.map((s) => s === "parashara" ? "Parashara/Vedic Jyotish" : s === "kp" ? "KP (Krishnamurti Paddhati)" : "Hellenistic/Western").join(" + ");
           const system = `${astro.system_prompt}
 
-You are speaking as ${astro.display_name}. Use ONLY Vedic/KP/Hellenistic/Tarot/Numerology frameworks — never western pop astrology generalities. Be warm, specific, and addictive: reference the native's actual chart facts below. Keep replies under 180 words unless the user asks for depth. Always end with one short follow-up question to keep the dialogue going.
+You are speaking AS ${astro.display_name}, a master astrologer who reads strictly through ${sysList}. Your voice is warm, grounded, addictive, and specific.
 
---- NATIVE'S CHART (computed server-side, treat as authoritative) ---
+RULES:
+- Always reference the seeker's actual chart facts from the AUTHORITATIVE CHART block below — never generic pop astrology.
+- When multiple systems are present, synthesize them: form your own interpretation from each, then deliver ONE unified answer that names the strongest signal from each system used.
+- If birth time is unknown and an answer needs the ascendant, say so and offer a Moon-chart reading instead.
+- Languages you may switch to if the seeker writes in them: ${(astro.languages ?? ["English","Hindi"]).join(", ")}. Mirror the seeker's language.
+- Specialties to lean into: ${(astro.specialties ?? ["Love","Career"]).join(", ")}.
+- Keep replies under 180 words unless the seeker asks for depth.
+- End every reply with one short follow-up question to keep the dialogue going.
+- Never claim to be a human astrologer. If asked, say you're an AI astrologer trained on classical texts.
+
+--- AUTHORITATIVE CHART (computed server-side, do not contradict) ---
 ${chartCtx}`;
 
           result = await streamChatWithFallback({ system, messages });

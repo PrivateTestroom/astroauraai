@@ -21,17 +21,24 @@ export type Database = {
           bio: string | null
           created_at: string
           display_name: string
+          experience_years: number
+          free_minutes: number
           id: string
           is_active: boolean
           is_recommended: boolean
+          languages: string[]
           primary_system: string
           priority: number
           rate_paise_per_min: number
+          rating: number
+          reviews_count: number
           skill_level: number
           slug: string
           specialties: string[]
           system_prompt: string
+          systems: string[]
           tagline: string | null
+          visible: boolean
         }
         Insert: {
           avatar_emoji?: string
@@ -39,17 +46,24 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name: string
+          experience_years?: number
+          free_minutes?: number
           id?: string
           is_active?: boolean
           is_recommended?: boolean
+          languages?: string[]
           primary_system: string
           priority?: number
           rate_paise_per_min?: number
+          rating?: number
+          reviews_count?: number
           skill_level?: number
           slug: string
           specialties?: string[]
           system_prompt: string
+          systems?: string[]
           tagline?: string | null
+          visible?: boolean
         }
         Update: {
           avatar_emoji?: string
@@ -57,17 +71,24 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string
+          experience_years?: number
+          free_minutes?: number
           id?: string
           is_active?: boolean
           is_recommended?: boolean
+          languages?: string[]
           primary_system?: string
           priority?: number
           rate_paise_per_min?: number
+          rating?: number
+          reviews_count?: number
           skill_level?: number
           slug?: string
           specialties?: string[]
           system_prompt?: string
+          systems?: string[]
           tagline?: string | null
+          visible?: boolean
         }
         Relationships: []
       }

@@ -40,7 +40,7 @@ export const adminListAstrologers = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { data } = await context.supabase.from("astrologers")
-      .select("id, slug, display_name, rate_paise_per_min, is_active, is_recommended, priority")
+      .select("id, slug, display_name, rate_paise_per_min, free_minutes, is_active, is_recommended, priority, systems, languages, specialties, rating, experience_years, bio")
       .order("priority", { ascending: false });
     return data ?? [];
   });
@@ -50,8 +50,15 @@ export const adminUpdateAstrologer = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({
     id: z.string().uuid(),
     rate_paise_per_min: z.number().int().min(100).max(20000).optional(),
+    free_minutes: z.number().int().min(0).max(60).optional(),
     is_active: z.boolean().optional(),
     is_recommended: z.boolean().optional(),
+    systems: z.array(z.enum(["parashara","kp","hellenistic"])).optional(),
+    languages: z.array(z.string().min(1).max(40)).max(10).optional(),
+    specialties: z.array(z.string().min(1).max(40)).max(10).optional(),
+    rating: z.number().min(1).max(5).optional(),
+    experience_years: z.number().int().min(0).max(80).optional(),
+    bio: z.string().max(2000).optional(),
   }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
