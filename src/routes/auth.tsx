@@ -7,6 +7,8 @@ import { phoneToEmail, isValidIndianPhone, normalizePhone } from "@/lib/phone-au
 import { AppLogo } from "@/components/AppLogo";
 import { toast } from "sonner";
 
+const EXISTING_ACCOUNT_CODES = new Set(["user_already_exists", "email_exists", "phone_exists"]);
+
 const searchSchema = z.object({
   mode: z.enum(["signin", "signup"]).default("signin"),
 });
@@ -48,12 +50,29 @@ function AuthPage() {
       const normalized = normalizePhone(phone);
       const email = phoneToEmail(normalized);
       if (mode === "signup") {
+        const existing = await supabase.auth.signInWithPassword({ email, password });
+        if (!existing.error) {
+          toast.info("This account already exists. You are signed in now.");
+          navigate({ to: "/home" });
+          return;
+        }
+        if (!existing.error.message.toLowerCase().includes("invalid login")) {
+          throw existing.error;
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: { data: { phone: normalized, full_name: fullName || null } },
         });
-        if (error) throw error;
+        if (error) {
+          if (EXISTING_ACCOUNT_CODES.has(error.code ?? "") || error.message.toLowerCase().includes("already")) {
+            toast.error("This phone number already has an account. Please sign in instead.");
+            setMode("signin");
+            setPassword("");
+            return;
+          }
+          throw error;
+        }
         toast.success("Account created. Welcome!");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
