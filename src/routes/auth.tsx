@@ -59,7 +59,7 @@ function AuthPage() {
         if (!existing.error.message.toLowerCase().includes("invalid login")) {
           throw existing.error;
         }
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email,
           password,
           options: { data: { phone: normalized, full_name: fullName || null } },
@@ -72,6 +72,12 @@ function AuthPage() {
             return;
           }
           throw error;
+        }
+        if (signUpData.user && Array.isArray(signUpData.user.identities) && signUpData.user.identities.length === 0) {
+          toast.error("This phone number already has an account. Please sign in instead.");
+          setMode("signin");
+          setPassword("");
+          return;
         }
         toast.success("Account created. Welcome!");
       } else {
