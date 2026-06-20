@@ -1,6 +1,6 @@
 // Planet positions (tropical + sidereal) using astronomy-engine + analytical
 // formulas for Rahu (mean lunar node).
-import { EclipticLongitude, MakeTime, SiderealTime } from "astronomy-engine";
+import { EclipticLongitude, MakeTime, SiderealTime, SunPosition } from "astronomy-engine";
 import {
   PLANETS, PLANET_BODY, type Planet,
   lahiriAyanamsa, norm360,
@@ -29,6 +29,7 @@ export type PlanetPositionTrop = {
 export function tropicalLongitude(planet: Planet, date: Date): number {
   if (planet === "Rahu") return meanRahuLongitude(date);
   if (planet === "Ketu") return norm360(meanRahuLongitude(date) + 180);
+  if (planet === "Sun") return norm360(SunPosition(date).elon);
   const t = MakeTime(date);
   return norm360(EclipticLongitude(PLANET_BODY[planet], t));
 }
