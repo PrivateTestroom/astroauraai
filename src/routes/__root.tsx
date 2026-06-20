@@ -89,6 +89,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Chat with AI astrologers trained in Vedic, KP, Hellenistic and Tarot. Daily horoscope, birth chart, real spiritual guidance." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "AstroAura AI — Talk to AI Astrologers" },
+      { name: "twitter:description", content: "Chat with AI astrologers trained in Vedic, KP, Hellenistic and Tarot. Daily horoscope, birth chart, real spiritual guidance." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e4dc42ba-0a4a-4f80-93d1-7c5991be0dda/id-preview-167cb4a0--7bd10eef-cb08-4512-b13b-ea76a6732f0f.lovable.app-1781955324429.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e4dc42ba-0a4a-4f80-93d1-7c5991be0dda/id-preview-167cb4a0--7bd10eef-cb08-4512-b13b-ea76a6732f0f.lovable.app-1781955324429.png" },
     ],
     links: [
       {
