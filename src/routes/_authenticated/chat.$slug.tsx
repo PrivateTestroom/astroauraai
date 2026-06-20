@@ -40,7 +40,25 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [input, setInput] = useState("");
   const [balance, setBalance] = useState(session.balancePaise);
-  const [freeConsumed, setFreeConsumed] = useState(session.freeConsumed);
+  const [freeStartedAt, setFreeStartedAt] = useState<string | null>(session.freeStartedAt);
+  const [now, setNow] = useState(() => Date.now());
+
+  // Tick countdown every second while free window is active
+  useEffect(() => {
+    if (!freeStartedAt) return;
+    const started = new Date(freeStartedAt).getTime();
+    const ends = started + 2 * 60 * 1000;
+    if (Date.now() >= ends) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [freeStartedAt]);
+
+  const freeRemainingMs = freeStartedAt
+    ? Math.max(0, new Date(freeStartedAt).getTime() + 2 * 60 * 1000 - now)
+    : 2 * 60 * 1000;
+  const freeActive = freeRemainingMs > 0;
+  const mm = Math.floor(freeRemainingMs / 60000);
+  const ss = Math.floor((freeRemainingMs % 60000) / 1000).toString().padStart(2, "0");
 
   const initialMessages: UIMessage[] = useMemo(
     () => session.messages.map((m) => ({ id: m.id, role: m.role, parts: m.parts })) as UIMessage[],
@@ -55,8 +73,14 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
       if (data.session) headers.set("Authorization", `Bearer ${data.session.access_token}`);
       const body = init?.body ? JSON.parse(init.body as string) : {};
       const res = await fetch(url, { ...init, headers, body: JSON.stringify({ ...body, threadId: session.threadId }) });
-      if (res.status === 402) {
-        toast.error("Out of balance. Please top up your wallet to continue.");
+      if (!res.ok) {
+        let errBody: { error?: string; message?: string } = {};
+        try { errBody = await res.clone().json(); } catch { /* not json */ }
+        const message = errBody.message || `Chat failed (${res.status})`;
+        if (res.status === 402) toast.error(message, { action: { label: "Top up", onClick: () => { window.location.href = "/wallet"; } } });
+        else if (res.status === 429) toast.error("Too many requests. Please wait a moment.");
+        else toast.error(message);
+        throw new Error(message);
       }
       return res;
     },
@@ -66,16 +90,22 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
     id: session.threadId,
     messages: initialMessages,
     transport,
-    onError: (e) => toast.error(e.message || "Chat failed"),
+    onError: (e) => {
+      // Toast already shown in fetch wrapper for HTTP errors; only toast on bare stream errors.
+      if (e?.message && !e.message.startsWith("Chat failed")) toast.error(e.message);
+    },
     onFinish: () => {
       onBalanceRefresh();
-      // Refresh balance from server
+      // Refresh balance + free-window state from server
       supabase.auth.getUser().then(async ({ data }) => {
         if (!data.user) return;
-        const { data: b } = await supabase.from("wallet_balances").select("balance_paise").eq("user_id", data.user.id).maybeSingle();
+        const [{ data: b }, { data: t }] = await Promise.all([
+          supabase.from("wallet_balances").select("balance_paise").eq("user_id", data.user.id).maybeSingle(),
+          supabase.from("chat_threads").select("free_started_at").eq("id", session.threadId).maybeSingle(),
+        ]);
         if (b) setBalance(b.balance_paise);
+        if (t && !freeStartedAt) setFreeStartedAt((t as { free_started_at?: string | null }).free_started_at ?? null);
       });
-      setFreeConsumed(true);
     },
   });
 
@@ -84,7 +114,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
 
   const isLoading = status === "submitted" || status === "streaming";
   const ratePaise = session.astrologer.rate_paise_per_min;
-  const canSend = !isLoading && input.trim().length > 0 && (!freeConsumed ? true : balance >= ratePaise);
+  const canSend = !isLoading && input.trim().length > 0 && (freeActive || balance >= ratePaise);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -113,9 +143,19 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
         </Link>
       </header>
 
-      {!freeConsumed && (
-        <div className="mt-2 flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 text-[11px] text-accent">
-          <Sparkles className="h-3 w-3" /> Your first message is free. After that ₹{(ratePaise / 100).toFixed(0)} per reply.
+      {freeActive ? (
+        <div className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 text-[11px] text-accent">
+          <span className="flex items-center gap-1.5"><Sparkles className="h-3 w-3" /> Free trial</span>
+          <span className="font-mono tabular-nums">{mm}:{ss} left · then ₹{(ratePaise / 100).toFixed(0)}/reply</span>
+        </div>
+      ) : balance < ratePaise ? (
+        <Link to="/wallet" className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-[11px] text-destructive">
+          <span>Free trial ended. Top up to continue.</span>
+          <span className="font-semibold">Top up →</span>
+        </Link>
+      ) : (
+        <div className="mt-2 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-muted-foreground">
+          <Sparkles className="h-3 w-3 text-accent" /> Paid mode · ₹{(ratePaise / 100).toFixed(0)} per reply
         </div>
       )}
 
