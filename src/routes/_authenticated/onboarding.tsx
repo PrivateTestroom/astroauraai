@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
-  head: () => ({ meta: [{ title: "Tell us about yourself — AstroSage" }] }),
+  head: () => ({ meta: [{ title: "Tell us about yourself — AstroAura" }] }),
   component: OnboardingPage,
 });
 

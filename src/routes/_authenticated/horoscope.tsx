@@ -1,15 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { BottomNav } from "@/components/BottomNav";
-import { useProfile } from "@/lib/profile";
-import { Sparkles } from "lucide-react";
+import { getDailyHoroscope } from "@/lib/horoscope.functions";
+import { getMyChart } from "@/lib/chart.functions";
+import { Sparkles, Heart, Briefcase, Activity, Star } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/horoscope")({
-  head: () => ({ meta: [{ title: "Daily Horoscope — AstroSage" }] }),
+  head: () => ({ meta: [{ title: "Daily Horoscope — AstroAura" }] }),
   component: HoroscopePage,
 });
 
 function HoroscopePage() {
-  const { data: profile } = useProfile();
+  const hFn = useServerFn(getDailyHoroscope);
+  const cFn = useServerFn(getMyChart);
+  const horoscope = useQuery({ queryKey: ["horoscope-today"], queryFn: () => hFn({}), staleTime: 60 * 60 * 1000 });
+  const chart = useQuery({ queryKey: ["my-chart"], queryFn: () => cFn({}) });
   const today = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
 
   return (
@@ -17,16 +23,59 @@ function HoroscopePage() {
       <div className="text-xs uppercase tracking-widest text-accent">{today}</div>
       <h1 className="font-display mt-1 text-3xl font-bold">Your horoscope</h1>
 
-      <section className="glass mt-6 rounded-2xl p-6 text-center">
-        <Sparkles className="mx-auto h-10 w-10 text-accent" />
-        <p className="mt-4 font-display text-xl">Coming online soon</p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {profile?.full_name ? `${profile.full_name.split(" ")[0]}, your` : "Your"} daily horoscope will appear here
-          once Phase 3 (the Vedic / KP / Hellenistic engine) is shipped.
-        </p>
-      </section>
+      {chart.data && (
+        <section className="glass mt-5 grid grid-cols-3 gap-2 rounded-2xl p-4 text-center">
+          <ChartChip label="Rashi" value={chart.data.moonRashi.sanskrit} />
+          <ChartChip label="Nakshatra" value={chart.data.nakshatra.name} />
+          <ChartChip label="Lagna" value={chart.data.ascendant?.sanskrit ?? "—"} />
+        </section>
+      )}
+
+      {horoscope.isLoading && (
+        <div className="glass mt-6 rounded-2xl p-6 text-center text-sm text-muted-foreground">
+          <Sparkles className="mx-auto mb-2 h-6 w-6 animate-pulse text-accent" /> Consulting the stars…
+        </div>
+      )}
+
+      {horoscope.data && (
+        <>
+          <section className="glass mt-6 rounded-2xl p-5">
+            <Sparkles className="h-5 w-5 text-accent" />
+            <p className="mt-3 text-sm leading-relaxed">{horoscope.data.summary}</p>
+          </section>
+
+          <div className="mt-4 grid gap-3">
+            <Card icon={Heart} title="Love" body={horoscope.data.love} />
+            <Card icon={Briefcase} title="Career" body={horoscope.data.career} />
+            <Card icon={Activity} title="Health" body={horoscope.data.health} />
+            <Card icon={Star} title="Lucky" body={horoscope.data.lucky} />
+          </div>
+        </>
+      )}
 
       <BottomNav />
     </main>
+  );
+}
+
+function ChartChip({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="font-display mt-1 text-sm font-semibold">{value}</div>
+    </div>
+  );
+}
+
+function Card({ icon: Icon, title, body }: { icon: typeof Heart; title: string; body?: string }) {
+  if (!body) return null;
+  return (
+    <div className="glass flex gap-3 rounded-2xl p-4">
+      <Icon className="h-4 w-4 shrink-0 text-accent" />
+      <div>
+        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{title}</div>
+        <div className="mt-0.5 text-sm">{body}</div>
+      </div>
+    </div>
   );
 }

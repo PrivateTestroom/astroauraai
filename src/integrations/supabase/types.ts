@@ -110,24 +110,30 @@ export type Database = {
         Row: {
           astrologer_id: string
           created_at: string
+          free_consumed: boolean
           id: string
           last_message_at: string | null
+          message_count: number
           title: string | null
           user_id: string
         }
         Insert: {
           astrologer_id: string
           created_at?: string
+          free_consumed?: boolean
           id?: string
           last_message_at?: string | null
+          message_count?: number
           title?: string | null
           user_id: string
         }
         Update: {
           astrologer_id?: string
           created_at?: string
+          free_consumed?: boolean
           id?: string
           last_message_at?: string | null
+          message_count?: number
           title?: string | null
           user_id?: string
         }
@@ -290,12 +296,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_or_create_thread: {
+        Args: { _astrologer_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      wallet_admin_credit: {
+        Args: { _amount_paise: number; _note?: string; _target_user: string }
+        Returns: number
+      }
+      wallet_debit_for_chat: {
+        Args: {
+          _astrologer_id: string
+          _rate_paise: number
+          _thread_id: string
+          _user_id: string
+        }
+        Returns: number
       }
     }
     Enums: {

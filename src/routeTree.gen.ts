@@ -12,12 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedHoroscopeRouteImport } from './routes/_authenticated/horoscope'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedChatSlugRouteImport } from './routes/_authenticated/chat.$slug'
 import { Route as AuthenticatedAstrologerSlugRouteImport } from './routes/_authenticated/astrologer.$slug'
 
 const AuthRoute = AuthRouteImport.update({
@@ -32,6 +34,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
@@ -64,6 +71,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedChatSlugRoute = AuthenticatedChatSlugRouteImport.update({
+  id: '/chat/$slug',
+  path: '/chat/$slug',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAstrologerSlugRoute =
   AuthenticatedAstrologerSlugRouteImport.update({
     id: '/astrologer/$slug',
@@ -80,7 +92,9 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/wallet': typeof AuthenticatedWalletRoute
+  '/api/chat': typeof ApiChatRoute
   '/astrologer/$slug': typeof AuthenticatedAstrologerSlugRoute
+  '/chat/$slug': typeof AuthenticatedChatSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -91,7 +105,9 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/wallet': typeof AuthenticatedWalletRoute
+  '/api/chat': typeof ApiChatRoute
   '/astrologer/$slug': typeof AuthenticatedAstrologerSlugRoute
+  '/chat/$slug': typeof AuthenticatedChatSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,7 +120,9 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
+  '/api/chat': typeof ApiChatRoute
   '/_authenticated/astrologer/$slug': typeof AuthenticatedAstrologerSlugRoute
+  '/_authenticated/chat/$slug': typeof AuthenticatedChatSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -117,7 +135,9 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/profile'
     | '/wallet'
+    | '/api/chat'
     | '/astrologer/$slug'
+    | '/chat/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -128,7 +148,9 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/profile'
     | '/wallet'
+    | '/api/chat'
     | '/astrologer/$slug'
+    | '/chat/$slug'
   id:
     | '__root__'
     | '/'
@@ -140,13 +162,16 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
     | '/_authenticated/wallet'
+    | '/api/chat'
     | '/_authenticated/astrologer/$slug'
+    | '/_authenticated/chat/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -170,6 +195,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/wallet': {
@@ -214,6 +246,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/chat/$slug': {
+      id: '/_authenticated/chat/$slug'
+      path: '/chat/$slug'
+      fullPath: '/chat/$slug'
+      preLoaderRoute: typeof AuthenticatedChatSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/astrologer/$slug': {
       id: '/_authenticated/astrologer/$slug'
       path: '/astrologer/$slug'
@@ -232,6 +271,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
   AuthenticatedAstrologerSlugRoute: typeof AuthenticatedAstrologerSlugRoute
+  AuthenticatedChatSlugRoute: typeof AuthenticatedChatSlugRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -242,6 +282,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRoute,
   AuthenticatedAstrologerSlugRoute: AuthenticatedAstrologerSlugRoute,
+  AuthenticatedChatSlugRoute: AuthenticatedChatSlugRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -251,6 +292,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
