@@ -146,7 +146,7 @@ export function currentDashaChain(periods: DashaPeriod[], now = new Date()): Das
   const chain: DashaPeriod[] = [];
   let level: DashaPeriod[] | undefined = periods;
   while (level) {
-    const active = level.find((p) => p.start <= now && now < p.end);
+    const active: DashaPeriod | undefined = level.find((p) => p.start <= now && now < p.end);
     if (!active) break;
     chain.push(active);
     level = active.sub;
