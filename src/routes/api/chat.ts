@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { type UIMessage } from "ai";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { computeChart, resolveCoords } from "@/lib/astrology/engine";
+import { streamChatWithFallback } from "@/lib/gemini.server";
 
 type Body = { messages?: UIMessage[]; threadId?: string };
 
@@ -88,13 +88,8 @@ Hellenistic sect: ${c.hellenistic.sect}, Lot of Fortune in: ${c.hellenistic.lotO
 Lahiri ayanamsa used: ${c.ayanamsa}°`;
         }
 
-        const key = process.env.LOVABLE_API_KEY;
-        if (!key) return jsonError("ai_unavailable", "AI service is not configured.", 500);
-
         let result;
         try {
-          const gateway = createLovableAiGatewayProvider(key);
-
           const system = `${astro.system_prompt}
 
 You are speaking as ${astro.display_name}. Use ONLY Vedic/KP/Hellenistic/Tarot/Numerology frameworks — never western pop astrology generalities. Be warm, specific, and addictive: reference the native's actual chart facts below. Keep replies under 180 words unless the user asks for depth. Always end with one short follow-up question to keep the dialogue going.
@@ -102,14 +97,7 @@ You are speaking as ${astro.display_name}. Use ONLY Vedic/KP/Hellenistic/Tarot/N
 --- NATIVE'S CHART (computed server-side, treat as authoritative) ---
 ${chartCtx}`;
 
-          result = streamText({
-            model: gateway("google/gemini-3-flash-preview"),
-            system,
-            messages: await convertToModelMessages(messages),
-            onError: ({ error }) => {
-              console.error("[chat] streamText error", error);
-            },
-          });
+          result = await streamChatWithFallback({ system, messages });
         } catch (e) {
           const msg = e instanceof Error ? e.message : "AI gateway error";
           return jsonError("ai_unavailable", msg, 502);
