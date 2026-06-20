@@ -1,6 +1,6 @@
 {
-  "name": "AstroSage AI — Talk to AI Astrologers",
-  "short_name": "AstroSage",
+  "name": "AstroAura AI — Talk to AI Astrologers",
+  "short_name": "AstroAura",
   "description": "Chat with AI astrologers trained in Vedic, KP, Hellenistic and Tarot. Daily horoscope, birth chart, real answers.",
   "start_url": "/",
   "scope": "/",
