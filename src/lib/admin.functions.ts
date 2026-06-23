@@ -87,3 +87,92 @@ export const adminGetStats = createServerFn({ method: "GET" })
       revenueInr: Math.round(revenuePaise / 100),
     };
   });
+
+export const adminCreateAstrologer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    slug: z.string().min(2).max(60).regex(/^[a-z0-9-]+$/),
+    display_name: z.string().min(2).max(80),
+    tagline: z.string().max(160).optional(),
+    bio: z.string().max(2000).optional(),
+    primary_system: z.enum(["vedic","kp","hellenistic","tarot","numerology","combined"]),
+    rate_paise_per_min: z.number().int().min(100).max(20000),
+    free_minutes: z.number().int().min(0).max(60).default(2),
+    specialties: z.array(z.string().min(1).max(40)).max(10).default([]),
+    languages: z.array(z.string().min(1).max(40)).max(10).default(["English","Hindi"]),
+    systems: z.array(z.enum(["parashara","kp","hellenistic"])).default(["parashara"]),
+    experience_years: z.number().int().min(0).max(80).default(5),
+    rating: z.number().min(1).max(5).default(4.7),
+    avatar_emoji: z.string().max(8).default("🔮"),
+    avatar_gradient: z.string().max(80).default("from-violet-500 to-fuchsia-500"),
+    system_prompt: z.string().min(20).max(4000),
+    is_recommended: z.boolean().default(false),
+    is_active: z.boolean().default(true),
+    priority: z.number().int().min(0).max(1000).default(0),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { error, data: row } = await context.supabase.from("astrologers").insert(data).select("id").single();
+    if (error) throw new Error(error.message);
+    return { id: row.id };
+  });
+
+export const adminDeleteAstrologer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { error } = await context.supabase.from("astrologers").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminDebitWallet = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    userId: z.string().uuid(), amountInr: z.number().int().positive(), note: z.string().max(200).optional(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: bal } = await supabaseAdmin.from("wallet_balances").select("balance_paise").eq("user_id", data.userId).maybeSingle();
+    const current = bal?.balance_paise ?? 0;
+    const debit = data.amountInr * 100;
+    if (current < debit) throw new Error("Insufficient balance");
+    const newBal = current - debit;
+    const { error: upErr } = await supabaseAdmin.from("wallet_balances").update({ balance_paise: newBal }).eq("user_id", data.userId);
+    if (upErr) throw new Error(upErr.message);
+    await supabaseAdmin.from("wallet_transactions").insert({
+      user_id: data.userId, kind: "admin_debit", amount_paise: -debit, balance_after_paise: newBal,
+      meta: { admin_id: context.userId, note: data.note ?? "" },
+    });
+    return { balancePaise: newBal };
+  });
+
+export const adminResetThreadFreeWindow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ userId: z.string().uuid(), astrologerId: z.string().uuid().optional() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let q = supabaseAdmin.from("chat_threads")
+      .update({ free_started_at: null, last_charge_at: null, free_consumed: false })
+      .eq("user_id", data.userId);
+    if (data.astrologerId) q = q.eq("astrologer_id", data.astrologerId);
+    const { error } = await q;
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminListRecentThreads = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("chat_threads")
+      .select("id, user_id, astrologer_id, message_count, last_message_at, free_consumed")
+      .order("last_message_at", { ascending: false, nullsFirst: false })
+      .limit(50);
+    return data ?? [];
+  });

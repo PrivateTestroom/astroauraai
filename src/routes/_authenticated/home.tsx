@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AstrologerCard, type Astrologer } from "@/components/AstrologerCard";
 import { BottomNav } from "@/components/BottomNav";
 import { AppLogo } from "@/components/AppLogo";
-import { useProfile } from "@/lib/profile";
-import { Wallet } from "lucide-react";
+import { useProfile, useIsAdmin } from "@/lib/profile";
+import { Wallet, Shield } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { CosmicLoader } from "@/components/CosmicLoader";
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/_authenticated/home")({
 
 function HomePage() {
   const profile = useProfile();
+  const { data: isAdmin } = useIsAdmin();
   const navigate = useNavigate();
   const wallet = useQuery({
     queryKey: ["wallet"],
@@ -71,10 +72,17 @@ function HomePage() {
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">The sky is open</p>
           </div>
         </div>
-        <Link to="/wallet" className="glass flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold">
-          <Wallet className="h-3.5 w-3.5 text-accent" />
-          ₹{balanceInr}
-        </Link>
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <Link to="/admin" className="glass flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold text-accent">
+              <Shield className="h-3.5 w-3.5" /> Admin
+            </Link>
+          )}
+          <Link to="/wallet" className="glass flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold">
+            <Wallet className="h-3.5 w-3.5 text-accent" />
+            ₹{balanceInr}
+          </Link>
+        </div>
       </header>
 
       <div className="gold-divider mt-5" />
