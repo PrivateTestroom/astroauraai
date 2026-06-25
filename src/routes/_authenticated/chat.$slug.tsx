@@ -65,6 +65,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
     () => session.messages.map((m) => ({ id: m.id, role: m.role, parts: m.parts })) as UIMessage[],
     [session.messages],
   );
+  const initialIds = useMemo(() => new Set(initialMessages.map((m) => m.id)), [initialMessages]);
 
   const transport = useMemo(() => new DefaultChatTransport({
     api: "/api/chat",
@@ -172,12 +173,14 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
         {messages.map((m, i) => {
           const isLast = i === messages.length - 1;
           const streaming = isLoading && isLast && m.role === "assistant";
+          const reveal = m.role === "assistant" && !initialIds.has(m.id);
           return (
             <Bubble
               key={m.id}
               m={m}
               astroEmoji={session.astrologer.avatar_emoji}
               streaming={streaming}
+              reveal={reveal}
             />
           );
         })}
@@ -230,12 +233,12 @@ function useSlowReveal(fullText: string, enabled: boolean) {
   return enabled ? fullText.slice(0, idx) : fullText;
 }
 
-function Bubble({ m, astroEmoji, streaming }: { m: UIMessage; astroEmoji: string; streaming?: boolean }) {
+function Bubble({ m, astroEmoji, streaming, reveal }: { m: UIMessage; astroEmoji: string; streaming?: boolean; reveal?: boolean }) {
   const isUser = m.role === "user";
   const fullText = m.parts.map((p) => (p.type === "text" ? (p as { text: string }).text : "")).join("");
-  const reveal = useSlowReveal(fullText, !isUser && !!streaming);
-  const text = isUser ? fullText : reveal;
-  const stillWriting = !isUser && (streaming || reveal.length < fullText.length);
+  const revealed = useSlowReveal(fullText, !isUser && !!reveal);
+  const text = isUser ? fullText : revealed;
+  const stillWriting = !isUser && (streaming || revealed.length < fullText.length);
   return (
     <div className={`flex gap-2 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser && <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/5 text-sm">{astroEmoji}</div>}
