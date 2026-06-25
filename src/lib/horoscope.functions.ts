@@ -49,10 +49,23 @@ Hellenistic sect: ${chart.hellenistic.sect}
 
 Return JSON ONLY with keys: summary (2-3 sentences, mystical but practical), love (1 sentence), career (1 sentence), health (1 sentence), lucky (e.g. "Color: Red · Number: 7 · Time: 4–6 PM"). No markdown, no commentary, just the JSON.`;
 
-    const { text } = await generateTextWithFallback({ prompt });
-    const jsonStr = text.match(/\{[\s\S]*\}/)?.[0] ?? "{}";
     let body: Record<string, string> = {};
-    try { body = JSON.parse(jsonStr); } catch { body = { summary: text.slice(0, 400) }; }
+    try {
+      const { text } = await generateTextWithFallback({ prompt });
+      const jsonStr = text.match(/\{[\s\S]*\}/)?.[0] ?? "{}";
+      try { body = JSON.parse(jsonStr); } catch { body = { summary: text.slice(0, 400) }; }
+    } catch (e) {
+      console.warn("[horoscope] AI unavailable, using fallback:", e instanceof Error ? e.message : e);
+      const moon = chart.moonRashi.sanskrit;
+      const nak = chart.nakshatra.name;
+      body = {
+        summary: `The Moon walks through ${moon} for you today, touching ${nak} nakshatra — a day to move quietly and listen before you act. Small, steady choices will carry more weight than bold ones.`,
+        love: `Speak gently; ${nak} rewards tenderness over cleverness in matters of the heart.`,
+        career: `Finish what's already on your desk; a senior figure is watching how you close, not how you start.`,
+        health: `Hydrate, walk after meals, and protect your sleep tonight.`,
+        lucky: `Color: Saffron · Number: 3 · Time: 4–6 PM`,
+      };
+    }
 
     await supabase.from("horoscope_cache").upsert({
       user_id: userId, for_date: date, body,

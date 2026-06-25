@@ -238,3 +238,8 @@ body > iframe[src*="gptengineer"] {
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+@keyframes writing {
+  0%, 100% { transform: rotate(-8deg) translateY(0); }
+  50%      { transform: rotate(8deg) translateY(-1px); }
+}

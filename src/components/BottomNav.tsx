@@ -13,20 +13,24 @@ const items = [
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-background/85 px-2 pb-[env(safe-area-inset-bottom)] pt-2 backdrop-blur-xl">
-      <ul className="mx-auto flex max-w-md items-stretch justify-around">
+    <nav
+      className="fixed right-2 top-1/2 z-40 -translate-y-1/2 rounded-2xl border border-white/10 bg-background/85 px-1.5 py-2 backdrop-blur-xl shadow-[0_10px_40px_-12px_rgba(0,0,0,0.8)]"
+      style={{ paddingRight: "max(0.375rem, env(safe-area-inset-right))" }}
+    >
+      <ul className="flex flex-col items-stretch gap-0.5">
         {items.map(({ to, label, icon: Icon }) => {
           const active = pathname === to || pathname.startsWith(to + "/");
           return (
-            <li key={to} className="flex-1">
+            <li key={to}>
               <Link
                 to={to}
-                className={`flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[10px] font-medium transition ${
-                  active ? "text-accent" : "text-muted-foreground"
+                aria-label={label}
+                className={`flex flex-col items-center gap-0.5 rounded-xl px-2.5 py-2 text-[9px] font-medium leading-none transition ${
+                  active ? "text-accent bg-white/5" : "text-muted-foreground"
                 }`}
               >
                 <Icon className={`h-5 w-5 ${active ? "drop-shadow-[0_0_8px_rgba(245,197,24,0.7)]" : ""}`} />
-                {label}
+                <span>{label}</span>
               </Link>
             </li>
           );

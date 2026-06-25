@@ -21,7 +21,7 @@ function HoroscopePage() {
   const today = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
 
   return (
-    <main className="relative z-10 mx-auto max-w-md px-4 pb-28 pt-8">
+    <main className="relative z-10 mx-auto max-w-md pl-4 pr-16 pb-10 pt-8">
       <div className="text-xs uppercase tracking-widest text-accent">{today}</div>
       <h1 className="font-display mt-1 text-3xl font-bold">Your horoscope</h1>
 

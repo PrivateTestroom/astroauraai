@@ -4,7 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { ArrowLeft, Send, Sparkles, Wallet } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Wallet, Feather } from "lucide-react";
 import { startChatThread } from "@/lib/chat.functions";
 import { CosmicLoader } from "@/components/CosmicLoader";
 import { useServerFn } from "@tanstack/react-start";
@@ -127,7 +127,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
   }
 
   return (
-    <main className="relative z-10 mx-auto flex h-[100dvh] max-w-md flex-col px-3 pb-3 pt-3">
+    <main className="relative z-10 mx-auto flex h-[100dvh] max-w-md flex-col px-3 pb-6 pt-3">
       <header className="glass flex items-center gap-3 rounded-2xl p-3">
         <button onClick={navigateBack} className="text-muted-foreground"><ArrowLeft className="h-5 w-5" /></button>
         <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${session.astrologer.avatar_gradient} text-xl`}>
@@ -160,7 +160,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
         </div>
       )}
 
-      <div ref={scrollRef} className="mt-3 flex-1 space-y-3 overflow-y-auto pb-3">
+      <div ref={scrollRef} className="mt-3 flex-1 space-y-3 overflow-y-auto pb-6">
         {messages.length === 0 && (
           <div className="glass mt-4 rounded-2xl p-5 text-sm text-muted-foreground">
             <div className="flex items-center gap-2 text-accent"><Sparkles className="h-4 w-4" /> <span className="font-display text-base text-foreground">Namaste 🙏</span></div>
@@ -169,13 +169,24 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
             </p>
           </div>
         )}
-        {messages.map((m) => <Bubble key={m.id} m={m} astroEmoji={session.astrologer.avatar_emoji} />)}
+        {messages.map((m, i) => {
+          const isLast = i === messages.length - 1;
+          const streaming = isLoading && isLast && m.role === "assistant";
+          return (
+            <Bubble
+              key={m.id}
+              m={m}
+              astroEmoji={session.astrologer.avatar_emoji}
+              streaming={streaming}
+            />
+          );
+        })}
         {status === "submitted" && (
           <div className="flex gap-2"><Typing /></div>
         )}
       </div>
 
-      <form onSubmit={onSubmit} className="glass flex items-end gap-2 rounded-2xl p-2">
+      <form onSubmit={onSubmit} className="glass mb-2 flex items-end gap-2 rounded-2xl p-2">
         <textarea
           ref={inputRef}
           value={input}
@@ -193,14 +204,63 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
   );
 }
 
-function Bubble({ m, astroEmoji }: { m: UIMessage; astroEmoji: string }) {
+function useSlowReveal(fullText: string, active: boolean) {
+  const [shown, setShown] = useState(active ? "" : fullText);
+  const idxRef = useRef(0);
+
+  useEffect(() => {
+    if (!active) { setShown(fullText); idxRef.current = fullText.length; return; }
+    // Walk forward word-by-word at a calm pace
+    let cancelled = false;
+    const tick = () => {
+      if (cancelled) return;
+      const target = fullText;
+      if (idxRef.current >= target.length) { setTimeout(tick, 90); return; }
+      // Advance to end of next whitespace-separated token
+      let next = idxRef.current;
+      while (next < target.length && /\s/.test(target[next])) next++;
+      while (next < target.length && !/\s/.test(target[next])) next++;
+      idxRef.current = next;
+      setShown(target.slice(0, next));
+      setTimeout(tick, 95);
+    };
+    const id = setTimeout(tick, 60);
+    return () => { cancelled = true; clearTimeout(id); };
+    // Re-run when streaming flag flips; while streaming we still depend on fullText growing
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+
+  // While streaming, keep target text fresh so the walker has more to chew on
+  useEffect(() => {
+    if (!active) setShown(fullText);
+  }, [fullText, active]);
+
+  return shown;
+}
+
+function Bubble({ m, astroEmoji, streaming }: { m: UIMessage; astroEmoji: string; streaming?: boolean }) {
   const isUser = m.role === "user";
-  const text = m.parts.map((p) => (p.type === "text" ? (p as { text: string }).text : "")).join("");
+  const fullText = m.parts.map((p) => (p.type === "text" ? (p as { text: string }).text : "")).join("");
+  const reveal = useSlowReveal(fullText, !isUser && !!streaming);
+  const text = isUser ? fullText : reveal;
+  const stillWriting = !isUser && (streaming || reveal.length < fullText.length);
   return (
     <div className={`flex gap-2 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser && <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/5 text-sm">{astroEmoji}</div>}
       <div className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${isUser ? "bg-primary text-primary-foreground" : "glass text-foreground"}`}>
-        {isUser ? text : <div className="prose prose-sm prose-invert max-w-none [&_p]:my-1"><ReactMarkdown>{text}</ReactMarkdown></div>}
+        {isUser ? (
+          text
+        ) : (
+          <>
+            <div className="prose prose-sm prose-invert max-w-none [&_p]:my-1"><ReactMarkdown>{text || "…"}</ReactMarkdown></div>
+            {stillWriting && (
+              <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-accent/80">
+                <Feather className="h-3 w-3 animate-[writing_1.4s_ease-in-out_infinite]" />
+                <span className="italic">writing…</span>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
