@@ -65,7 +65,7 @@ function TarotPage() {
   }
 
   return (
-    <main className="relative z-10 mx-auto min-h-[100dvh] max-w-md px-5 pb-32 pt-6">
+    <main className="relative z-10 mx-auto min-h-[100dvh] max-w-md pl-5 pr-16 pb-10 pt-6">
       <header className="mb-5">
         <p className="text-[11px] uppercase tracking-[0.3em] text-accent">Rider-Waite Tarot</p>
         <h1 className="font-display text-3xl font-semibold leading-tight">Three-Card Spread</h1>
