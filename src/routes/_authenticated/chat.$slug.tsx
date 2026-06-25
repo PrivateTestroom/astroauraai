@@ -178,7 +178,6 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
               m={m}
               astroEmoji={session.astrologer.avatar_emoji}
               streaming={streaming}
-              isInitialAssistant={!isUserLast(messages) && false}
             />
           );
         })}
@@ -203,10 +202,6 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
       </form>
     </main>
   );
-}
-
-function isUserLast(messages: UIMessage[]) {
-  return messages[messages.length - 1]?.role === "user";
 }
 
 function useSlowReveal(fullText: string, active: boolean) {
@@ -243,7 +238,7 @@ function useSlowReveal(fullText: string, active: boolean) {
   return shown;
 }
 
-function Bubble({ m, astroEmoji, streaming }: { m: UIMessage; astroEmoji: string; streaming?: boolean; isInitialAssistant?: boolean }) {
+function Bubble({ m, astroEmoji, streaming }: { m: UIMessage; astroEmoji: string; streaming?: boolean }) {
   const isUser = m.role === "user";
   const fullText = m.parts.map((p) => (p.type === "text" ? (p as { text: string }).text : "")).join("");
   const reveal = useSlowReveal(fullText, !isUser && !!streaming);
