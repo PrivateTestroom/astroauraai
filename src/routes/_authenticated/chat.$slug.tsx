@@ -127,7 +127,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
   }
 
   return (
-    <main className="relative z-10 mx-auto flex h-[100dvh] max-w-md flex-col px-3 pb-6 pt-3">
+    <main className="relative z-10 mx-auto flex h-[100dvh] max-w-md flex-col px-3 pb-24 pt-3">
       <header className="glass flex items-center gap-3 rounded-2xl p-3">
         <button onClick={navigateBack} className="text-muted-foreground"><ArrowLeft className="h-5 w-5" /></button>
         <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${session.astrologer.avatar_gradient} text-xl`}>
@@ -160,7 +160,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
         </div>
       )}
 
-      <div ref={scrollRef} className="mt-3 flex-1 space-y-3 overflow-y-auto pb-6">
+      <div ref={scrollRef} className="mt-3 flex-1 space-y-3 overflow-y-auto pb-4">
         {messages.length === 0 && (
           <div className="glass mt-4 rounded-2xl p-5 text-sm text-muted-foreground">
             <div className="flex items-center gap-2 text-accent"><Sparkles className="h-4 w-4" /> <span className="font-display text-base text-foreground">Namaste 🙏</span></div>
@@ -186,7 +186,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
         )}
       </div>
 
-      <form onSubmit={onSubmit} className="glass mb-2 flex items-end gap-2 rounded-2xl p-2">
+      <form onSubmit={onSubmit} className="glass mb-16 flex items-end gap-2 rounded-2xl p-2">
         <textarea
           ref={inputRef}
           value={input}
@@ -204,38 +204,30 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
   );
 }
 
-function useSlowReveal(fullText: string, active: boolean) {
-  const [shown, setShown] = useState(active ? "" : fullText);
-  const idxRef = useRef(0);
+function useSlowReveal(fullText: string, enabled: boolean) {
+  const [idx, setIdx] = useState(0);
+  const textRef = useRef(fullText);
+  textRef.current = fullText;
 
   useEffect(() => {
-    if (!active) { setShown(fullText); idxRef.current = fullText.length; return; }
-    // Walk forward word-by-word at a calm pace
+    if (!enabled) { setIdx(fullText.length); return; }
     let cancelled = false;
     const tick = () => {
       if (cancelled) return;
-      const target = fullText;
-      if (idxRef.current >= target.length) { setTimeout(tick, 90); return; }
-      // Advance to end of next whitespace-separated token
-      let next = idxRef.current;
-      while (next < target.length && /\s/.test(target[next])) next++;
-      while (next < target.length && !/\s/.test(target[next])) next++;
-      idxRef.current = next;
-      setShown(target.slice(0, next));
-      setTimeout(tick, 95);
+      setIdx((cur) => {
+        const target = textRef.current;
+        if (cur >= target.length) return cur;
+        let next = cur;
+        while (next < target.length && /\s/.test(target[next])) next++;
+        while (next < target.length && !/\s/.test(target[next])) next++;
+        return next;
+      });
     };
-    const id = setTimeout(tick, 60);
-    return () => { cancelled = true; clearTimeout(id); };
-    // Re-run when streaming flag flips; while streaming we still depend on fullText growing
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active]);
+    const id = setInterval(tick, 140);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [enabled, fullText.length]);
 
-  // While streaming, keep target text fresh so the walker has more to chew on
-  useEffect(() => {
-    if (!active) setShown(fullText);
-  }, [fullText, active]);
-
-  return shown;
+  return enabled ? fullText.slice(0, idx) : fullText;
 }
 
 function Bubble({ m, astroEmoji, streaming }: { m: UIMessage; astroEmoji: string; streaming?: boolean }) {
