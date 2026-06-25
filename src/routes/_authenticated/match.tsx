@@ -38,7 +38,7 @@ function MatchPage() {
   }
 
   return (
-    <main className="relative z-10 mx-auto max-w-md px-4 pb-28 pt-6">
+    <main className="relative z-10 mx-auto max-w-md pl-4 pr-16 pb-10 pt-6">
       <Link to="/home" className="inline-flex items-center gap-1 text-xs text-muted-foreground"><ArrowLeft className="h-3 w-3" /> Back</Link>
       <h1 className="font-display mt-4 text-3xl">Match-making</h1>
       <p className="mt-1 text-xs text-muted-foreground">Ashtakoot Guna Milan · 36 points</p>
