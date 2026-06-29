@@ -163,9 +163,10 @@ function SupportBadgeMask() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Contact AstroAura support on WhatsApp"
-      className="fixed bottom-4 right-4 z-[2147483647] flex h-12 w-12 items-center justify-center rounded-full border border-accent/30 bg-background/95 text-accent shadow-[0_10px_35px_-12px_rgba(0,0,0,0.9)] backdrop-blur transition hover:scale-105 hover:bg-secondary"
+      className="fixed bottom-4 right-4 z-[2147483647] flex h-[70px] w-[377px] max-w-[calc(100vw-2rem)] items-center justify-center gap-3 rounded-2xl border border-accent/30 bg-background/95 px-5 text-accent shadow-[0_10px_35px_-12px_rgba(0,0,0,0.9)] backdrop-blur transition hover:scale-[1.02] hover:bg-secondary"
     >
-      <MessageCircleQuestion className="h-5 w-5" />
+      <MessageCircleQuestion className="h-6 w-6 shrink-0" />
+      <span className="whitespace-nowrap text-sm font-semibold tracking-wide">Support on WhatsApp</span>
     </a>
   );
 }
