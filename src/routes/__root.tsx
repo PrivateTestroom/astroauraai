@@ -163,10 +163,11 @@ function SupportBadgeMask() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Contact AstroAura support on WhatsApp"
-      className="fixed bottom-4 right-4 z-[2147483647] flex h-[70px] w-[377px] max-w-[calc(100vw-2rem)] items-center justify-center gap-3 rounded-2xl border border-accent/30 bg-background/95 px-5 text-accent shadow-[0_10px_35px_-12px_rgba(0,0,0,0.9)] backdrop-blur transition hover:scale-[1.02] hover:bg-secondary"
+      className="fixed bottom-5 right-3 z-[2147483647] flex h-[38px] w-[145px] items-center justify-center gap-1.5 rounded-full border border-accent/30 bg-background/95 px-2 text-accent shadow-lg backdrop-blur transition hover:scale-[1.02] hover:bg-secondary sm:bottom-4 sm:right-4 sm:h-[70px] sm:w-[377px] sm:gap-3 sm:rounded-2xl sm:px-5"
     >
-      <MessageCircleQuestion className="h-6 w-6 shrink-0" />
-      <span className="whitespace-nowrap text-sm font-semibold tracking-wide">Support on WhatsApp</span>
+      <MessageCircleQuestion className="h-4 w-4 shrink-0 sm:h-6 sm:w-6" />
+      <span className="whitespace-nowrap text-xs font-semibold sm:hidden">Support</span>
+      <span className="hidden whitespace-nowrap text-sm font-semibold sm:inline">Support on WhatsApp</span>
     </a>
   );
 }
