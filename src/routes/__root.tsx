@@ -159,8 +159,10 @@ function ScrollToTop() {
 function SupportBadgeMask() {
   return (
     <a
-      href="mailto:support@astroaura.ai?subject=AstroAura%20AI%20Support"
-      aria-label="Contact AstroAura support"
+      href="https://wa.link/eyvvsn"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Contact AstroAura support on WhatsApp"
       className="fixed bottom-4 right-4 z-[2147483647] flex h-12 w-12 items-center justify-center rounded-full border border-accent/30 bg-background/95 text-accent shadow-[0_10px_35px_-12px_rgba(0,0,0,0.9)] backdrop-blur transition hover:scale-105 hover:bg-secondary"
     >
       <MessageCircleQuestion className="h-5 w-5" />
