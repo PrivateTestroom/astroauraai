@@ -16,6 +16,7 @@ import "../lib/fonts";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { MessageCircleQuestion } from "lucide-react";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 function NotFoundComponent() {
   return (
@@ -143,6 +144,7 @@ function RootComponent() {
       <ScrollToTop />
       <Outlet />
       <SupportBadgeMask />
+      <InstallPrompt />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
