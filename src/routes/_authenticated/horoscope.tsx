@@ -7,6 +7,8 @@ import { getDailyHoroscope } from "@/lib/horoscope.functions";
 import { getMyChart } from "@/lib/chart.functions";
 import { Sparkles, Heart, Briefcase, Activity, Star } from "lucide-react";
 import { CosmicLoader } from "@/components/CosmicLoader";
+import { useEffect } from "react";
+import { bumpStreak } from "@/lib/social-proof";
 
 export const Route = createFileRoute("/_authenticated/horoscope")({
   head: () => ({ meta: [{ title: "Daily Horoscope — AstroAura" }] }),
@@ -19,6 +21,9 @@ function HoroscopePage() {
   const horoscope = useQuery({ queryKey: ["horoscope-today"], queryFn: () => hFn({}), staleTime: 60 * 60 * 1000 });
   const chart = useQuery({ queryKey: ["my-chart"], queryFn: () => cFn({}) });
   const today = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
+
+  // Count today's visit toward the daily streak.
+  useEffect(() => { bumpStreak(); }, []);
 
   return (
     <main className="relative z-10 mx-auto max-w-md pl-4 pr-16 pb-10 pt-8">

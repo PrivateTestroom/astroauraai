@@ -5,10 +5,12 @@ import { AstrologerCard, type Astrologer } from "@/components/AstrologerCard";
 import { BottomNav } from "@/components/BottomNav";
 import { AppLogo } from "@/components/AppLogo";
 import { useProfile, useIsAdmin } from "@/lib/profile";
-import { Wallet, Shield } from "lucide-react";
+import { Wallet, Shield, Flame } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CosmicLoader } from "@/components/CosmicLoader";
+import { CosmicPulse } from "@/components/CosmicPulse";
+import { readStreak } from "@/lib/social-proof";
 
 export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({ meta: [{ title: "Astrologers — AstroAura" }] }),
@@ -19,6 +21,8 @@ function HomePage() {
   const profile = useProfile();
   const { data: isAdmin } = useIsAdmin();
   const navigate = useNavigate();
+  const [streak, setStreak] = useState({ count: 0, lastDay: "" });
+  useEffect(() => { setStreak(readStreak()); }, []);
   const wallet = useQuery({
     queryKey: ["wallet"],
     queryFn: async () => {
@@ -87,10 +91,17 @@ function HomePage() {
 
       <div className="gold-divider mt-5" />
 
+      <CosmicPulse />
+
       <section className="mt-7 grid grid-cols-3 gap-3 text-center">
         <Link to="/horoscope" className="glass rounded-2xl p-4">
           <div className="text-2xl">☀️</div>
           <div className="font-display mt-1.5 text-[12px] tracking-wide">Horoscope</div>
+          {streak.count > 0 && (
+            <div className="mt-1 flex items-center justify-center gap-0.5 text-[9px] font-semibold text-accent">
+              <Flame className="h-2.5 w-2.5" /> {streak.count}-day streak
+            </div>
+          )}
         </Link>
         <Link to="/kundli" className="glass rounded-2xl p-4">
           <div className="text-2xl">🪐</div>

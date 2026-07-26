@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import ReactMarkdown from "react-markdown";
-import { Sparkles, RotateCcw, Shuffle } from "lucide-react";
+import { Sparkles, RotateCcw, Shuffle, Share2 } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { CosmicLoader } from "@/components/CosmicLoader";
 import { MAJOR_ARCANA, shuffleDeck, maybeReversed, SPREAD_POSITIONS, type TarotCard } from "@/lib/tarot/deck";
@@ -142,9 +142,25 @@ function TarotPage() {
             </div>
           </article>
 
-          <button onClick={reset} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold">
-            <RotateCcw className="h-4 w-4" /> Draw another spread
-          </button>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={async () => {
+                const summary = `My tarot reading on AstroAura:\n\n${readingMutation.data!.cards
+                  .map((c) => `${c.position}: ${c.card.name}${c.reversed ? " (Reversed)" : ""}`)
+                  .join("\n")}\n\nGet your own → https://astroauraai.lovable.app/tarot`;
+                try {
+                  if (navigator.share) await navigator.share({ title: "My AstroAura tarot reading", text: summary });
+                  else { await navigator.clipboard.writeText(summary); toast.success("Reading copied — share it anywhere"); }
+                } catch { /* user cancelled */ }
+              }}
+              className="flex items-center justify-center gap-2 rounded-2xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm font-semibold text-accent"
+            >
+              <Share2 className="h-4 w-4" /> Share reading
+            </button>
+            <button onClick={reset} className="flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold">
+              <RotateCcw className="h-4 w-4" /> Draw again
+            </button>
+          </div>
         </section>
       )}
 
