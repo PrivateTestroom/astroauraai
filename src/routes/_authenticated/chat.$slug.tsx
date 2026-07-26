@@ -268,7 +268,7 @@ function Typing() {
   );
 }
 
-function FreeCountdown({ mm, ss, totalMs, ratePaise }: { mm: number; ss: number; totalMs: number; ratePaise: number }) {
+function FreeCountdown({ mm, ss, totalMs, ratePaise }: { mm: number; ss: string; totalMs: number; ratePaise: number }) {
   // Colour states: green > 30s, amber ≤ 30s, red ≤ 10s.
   const warning = totalMs <= 30_000;
   const critical = totalMs <= 10_000;
