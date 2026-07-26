@@ -146,10 +146,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
       </header>
 
       {freeActive ? (
-        <div className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 text-[11px] text-accent">
-          <span className="flex items-center gap-1.5"><Sparkles className="h-3 w-3" /> Free trial</span>
-          <span className="font-mono tabular-nums">{mm}:{ss} left · then ₹{(ratePaise / 100).toFixed(0)}/reply</span>
-        </div>
+        <FreeCountdown mm={mm} ss={ss} totalMs={freeRemainingMs} ratePaise={ratePaise} />
       ) : balance < ratePaise ? (
         <Link to="/wallet" className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-[11px] text-destructive">
           <span>Free trial ended. Top up to continue.</span>
@@ -267,6 +264,43 @@ function Typing() {
       <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent" style={{ animationDelay: "0ms" }} />
       <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent" style={{ animationDelay: "120ms" }} />
       <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent" style={{ animationDelay: "240ms" }} />
+    </div>
+  );
+}
+
+function FreeCountdown({ mm, ss, totalMs, ratePaise }: { mm: number; ss: number; totalMs: number; ratePaise: number }) {
+  // Colour states: green > 30s, amber ≤ 30s, red ≤ 10s.
+  const warning = totalMs <= 30_000;
+  const critical = totalMs <= 10_000;
+  const tone = critical
+    ? "border-red-400/50 bg-red-500/15 text-red-200"
+    : warning
+    ? "border-amber-400/50 bg-amber-500/15 text-amber-200"
+    : "border-accent/30 bg-accent/10 text-accent";
+  const pct = Math.max(0, Math.min(100, (totalMs / (2 * 60_000)) * 100));
+  const barTone = critical ? "bg-red-400" : warning ? "bg-amber-400" : "bg-accent";
+  return (
+    <div className={`mt-2 rounded-xl border px-3 py-2 text-[11px] ${tone}`}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex items-center gap-1.5">
+          <Sparkles className="h-3 w-3" />
+          {critical ? "Free time ending" : warning ? "Free time almost up" : "Free trial"}
+        </span>
+        <span className="font-mono tabular-nums font-semibold">
+          {mm}:{ss} left · then ₹{(ratePaise / 100).toFixed(0)}/min
+        </span>
+      </div>
+      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/10">
+        <div className={`h-full transition-all duration-1000 ${barTone}`} style={{ width: `${pct}%` }} />
+      </div>
+      {warning && (
+        <Link
+          to="/wallet"
+          className="mt-2 flex items-center justify-center gap-1.5 rounded-lg bg-black/40 px-3 py-1.5 text-[11px] font-semibold text-accent transition hover:bg-black/60"
+        >
+          <Wallet className="h-3 w-3" /> Add ₹99 to keep the flow →
+        </Link>
+      )}
     </div>
   );
 }
