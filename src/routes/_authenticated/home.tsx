@@ -65,86 +65,86 @@ function HomePage() {
   const others = astrologers.data?.filter((a) => !a.is_recommended) ?? [];
 
   return (
-    <main className="relative z-10 mx-auto max-w-md pl-4 pr-16 pb-10 pt-8">
-      <header className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+    <main className="relative z-10 mx-auto max-w-md pl-5 pr-20 pb-16 pt-10 space-y-8">
+      <header className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <AppLogo size={36} />
-          <div>
-            <h1 className="font-display text-lg font-semibold leading-tight">
+          <div className="min-w-0">
+            <h1 className="font-display truncate text-lg font-semibold leading-tight">
               Namaste{profile.data?.full_name ? `, ${profile.data.full_name.split(" ")[0]}` : ""}
             </h1>
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">The sky is open</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {isAdmin && (
-            <Link to="/admin" className="glass flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold text-accent">
-              <Shield className="h-3.5 w-3.5" /> Admin
+            <Link to="/admin" aria-label="Admin" className="glass flex items-center justify-center rounded-full p-2 text-accent">
+              <Shield className="h-3.5 w-3.5" />
             </Link>
           )}
-          <Link to="/wallet" className="glass flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold">
+          <Link to="/wallet" className="glass flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap">
             <Wallet className="h-3.5 w-3.5 text-accent" />
             ₹{balanceInr}
           </Link>
         </div>
       </header>
 
-      <div className="gold-divider mt-5" />
+      <div className="gold-divider" />
 
       <CosmicPulse />
 
-      <section className="mt-7 grid grid-cols-3 gap-3 text-center">
-        <Link to="/horoscope" className="glass rounded-2xl p-4">
+      <section className="grid grid-cols-3 gap-3 text-center">
+        <Link to="/horoscope" className="glass rounded-2xl px-2 py-5">
           <div className="text-2xl">☀️</div>
-          <div className="font-display mt-1.5 text-[12px] tracking-wide">Horoscope</div>
+          <div className="font-display mt-2 text-[12px] tracking-wide">Horoscope</div>
           {streak.count > 0 && (
-            <div className="mt-1 flex items-center justify-center gap-0.5 text-[9px] font-semibold text-accent">
-              <Flame className="h-2.5 w-2.5" /> {streak.count}-day streak
+            <div className="mt-1.5 flex items-center justify-center gap-0.5 text-[9px] font-semibold text-accent">
+              <Flame className="h-2.5 w-2.5" /> {streak.count}d streak
             </div>
           )}
         </Link>
-        <Link to="/kundli" className="glass rounded-2xl p-4">
+        <Link to="/kundli" className="glass rounded-2xl px-2 py-5">
           <div className="text-2xl">🪐</div>
-          <div className="font-display mt-1.5 text-[12px] tracking-wide">Kundli</div>
+          <div className="font-display mt-2 text-[12px] tracking-wide">Kundli</div>
         </Link>
-        <Link to="/match" className="glass rounded-2xl p-4">
+        <Link to="/match" className="glass rounded-2xl px-2 py-5">
           <div className="text-2xl">💞</div>
-          <div className="font-display mt-1.5 text-[12px] tracking-wide">Matching</div>
+          <div className="font-display mt-2 text-[12px] tracking-wide">Matching</div>
         </Link>
       </section>
 
-      <section className="glass mt-5 overflow-hidden rounded-2xl p-5">
+      <section className="glass overflow-hidden rounded-2xl p-6">
         <div className="text-[10px] uppercase tracking-[0.18em] text-accent">Today's sky</div>
-        <h2 className="font-display mt-1 text-xl">Your daily reading</h2>
-        <p className="mt-1 text-xs text-muted-foreground">Personalised from your chart — refreshed every morning.</p>
-        <Link to="/horoscope" className="mt-3 inline-block rounded-full border border-accent/40 px-4 py-1.5 text-xs font-semibold text-accent">
+        <h2 className="font-display mt-2 text-xl">Your daily reading</h2>
+        <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">Personalised from your chart — refreshed every morning.</p>
+        <Link to="/horoscope" className="mt-4 inline-block rounded-full border border-accent/40 px-4 py-1.5 text-xs font-semibold text-accent">
           Open today →
         </Link>
       </section>
 
       {astrologers.isLoading && (
-        <div className="mt-8 grid gap-3">
+        <div className="grid gap-4">
           {[1, 2, 3].map((i) => <div key={i} className="h-24 animate-pulse rounded-2xl bg-white/3" />)}
         </div>
       )}
 
       {recommended.length > 0 && (
-        <section className="mt-10">
-          <h2 className="font-display mb-4 flex items-center gap-2 text-sm font-semibold text-accent">
+        <section>
+          <h2 className="font-display mb-5 flex items-center gap-2 text-sm font-semibold text-accent">
             <span className="h-px w-6 bg-accent/40" /> Featured astrologers
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-5">
             {recommended.map((a) => <AstrologerCard key={a.id} a={a} />)}
           </div>
         </section>
       )}
 
       {others.length > 0 && (
-        <section className="mt-10">
-          <h2 className="font-display mb-4 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+        <section>
+          <h2 className="font-display mb-5 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
             <span className="h-px w-6 bg-white/20" /> All astrologers
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-5">
             {others.map((a) => <AstrologerCard key={a.id} a={a} />)}
           </div>
         </section>
