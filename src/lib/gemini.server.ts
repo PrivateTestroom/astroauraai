@@ -25,10 +25,6 @@ function buildModels(): { label: string; model: LanguageModel }[] {
   return out;
 }
 
-function isRetryable(err: unknown): boolean {
-  const msg = (err instanceof Error ? err.message : String(err)).toLowerCase();
-  return /404|not.?found|429|quota|rate.?limit|exhaust|503|overload|unavailable|500|timeout/.test(msg);
-}
 
 export async function streamChatWithFallback({
   system, messages,
