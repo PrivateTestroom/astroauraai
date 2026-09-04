@@ -40,21 +40,18 @@ export async function streamChatWithFallback({
   let lastErr: unknown;
   for (const c of candidates) {
     try {
+      // Cheap 1-token probe so a retired / quota-exhausted model fails here,
+      // before any SSE bytes are committed to the client.
+      await generateText({ model: c.model, prompt: "ok", maxOutputTokens: 1 });
       const result = streamText({ model: c.model, system, messages: modelMessages });
-      // Await the first chunk so a dead/quota-exhausted model fails here and we
-      // can fall through to the next one before any SSE is sent to the client.
-      const reader = result.textStream.getReader();
-      const first = await reader.read();
-      reader.releaseLock();
-      if (first.done && !first.value) throw new Error("empty response");
       console.log(`[ai] using ${c.label}`);
       return result;
     } catch (e) {
       lastErr = e;
       console.warn(`[ai] ${c.label} failed:`, e instanceof Error ? e.message : e);
-      if (!isRetryable(e)) continue;
     }
   }
+
   throw lastErr ?? new Error("All AI models failed");
 }
 
