@@ -65,7 +65,7 @@ function HomePage() {
   const others = astrologers.data?.filter((a) => !a.is_recommended) ?? [];
 
   return (
-    <main className="relative z-10 mx-auto max-w-md pl-5 pr-20 pb-16 pt-10 space-y-8">
+    <main className="relative z-10 mx-auto max-w-md px-5 pb-32 pt-8 space-y-8 lg:pr-24 lg:pb-16">
       <header className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <AppLogo size={36} />

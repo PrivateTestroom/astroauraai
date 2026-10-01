@@ -26,7 +26,7 @@ function HoroscopePage() {
   useEffect(() => { bumpStreak(); }, []);
 
   return (
-    <main className="relative z-10 mx-auto max-w-md pl-4 pr-16 pb-10 pt-8">
+    <main className="relative z-10 mx-auto max-w-md px-5 pb-32 pt-8 lg:pr-20 lg:pb-10">
       <div className="text-xs uppercase tracking-widest text-accent">{today}</div>
       <h1 className="font-display mt-1 text-3xl font-bold">Your horoscope</h1>
 

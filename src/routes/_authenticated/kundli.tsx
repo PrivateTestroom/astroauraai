@@ -15,7 +15,7 @@ function KundliPage() {
   const q = useQuery({ queryKey: ["my-kundli"], queryFn: () => fn({}) });
 
   return (
-    <main className="relative z-10 mx-auto max-w-md pl-4 pr-16 pb-10 pt-6">
+    <main className="relative z-10 mx-auto max-w-md px-5 pb-32 pt-6 lg:pr-20 lg:pb-10">
       <Link to="/home" className="inline-flex items-center gap-1 text-xs text-muted-foreground">
         <ArrowLeft className="h-3 w-3" /> Back
       </Link>

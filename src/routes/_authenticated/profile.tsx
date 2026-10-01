@@ -25,7 +25,7 @@ function ProfilePage() {
   }
 
   return (
-    <main className="relative z-10 mx-auto max-w-md pl-4 pr-16 pb-10 pt-8">
+    <main className="relative z-10 mx-auto max-w-md px-5 pb-32 pt-8 lg:pr-20 lg:pb-10">
       <h1 className="font-display text-2xl font-bold">Your profile</h1>
 
       <section className="glass mt-6 rounded-2xl p-5">
