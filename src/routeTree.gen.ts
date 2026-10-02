@@ -9,69 +9,44 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
-import { Route as AuthenticatedHoroscopeRouteImport } from './routes/_authenticated/horoscope'
-import { Route as AuthenticatedKundliRouteImport } from './routes/_authenticated/kundli'
-import { Route as AuthenticatedMatchRouteImport } from './routes/_authenticated/match'
-import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
-import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
-import { Route as AuthenticatedTarotRouteImport } from './routes/_authenticated/tarot'
-import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as AuthenticatedAstrologerSlugRouteImport } from './routes/_authenticated/astrologer.$slug'
+import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
+import { Route as AuthenticatedTarotRouteImport } from './routes/_authenticated/tarot'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedMatchRouteImport } from './routes/_authenticated/match'
+import { Route as AuthenticatedKundliRouteImport } from './routes/_authenticated/kundli'
+import { Route as AuthenticatedHoroscopeRouteImport } from './routes/_authenticated/horoscope'
+import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedChatSlugRouteImport } from './routes/_authenticated/chat.$slug'
+import { Route as AuthenticatedAstrologerSlugRouteImport } from './routes/_authenticated/astrologer.$slug'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
-  id: '/home',
-  path: '/home',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedHoroscopeRoute = AuthenticatedHoroscopeRouteImport.update({
-  id: '/horoscope',
-  path: '/horoscope',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedKundliRoute = AuthenticatedKundliRouteImport.update({
-  id: '/kundli',
-  path: '/kundli',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedMatchRoute = AuthenticatedMatchRouteImport.update({
-  id: '/match',
-  path: '/match',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
+const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedTarotRoute = AuthenticatedTarotRouteImport.update({
@@ -79,15 +54,45 @@ const AuthenticatedTarotRoute = AuthenticatedTarotRouteImport.update({
   path: '/tarot',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
-  id: '/wallet',
-  path: '/wallet',
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const ApiChatRoute = ApiChatRouteImport.update({
-  id: '/api/chat',
-  path: '/api/chat',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMatchRoute = AuthenticatedMatchRouteImport.update({
+  id: '/match',
+  path: '/match',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedKundliRoute = AuthenticatedKundliRouteImport.update({
+  id: '/kundli',
+  path: '/kundli',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHoroscopeRoute = AuthenticatedHoroscopeRouteImport.update({
+  id: '/horoscope',
+  path: '/horoscope',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedChatSlugRoute = AuthenticatedChatSlugRouteImport.update({
+  id: '/chat/$slug',
+  path: '/chat/$slug',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAstrologerSlugRoute =
   AuthenticatedAstrologerSlugRouteImport.update({
@@ -95,11 +100,6 @@ const AuthenticatedAstrologerSlugRoute =
     path: '/astrologer/$slug',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedChatSlugRoute = AuthenticatedChatSlugRouteImport.update({
-  id: '/chat/$slug',
-  path: '/chat/$slug',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -212,11 +212,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -226,60 +226,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/home': {
-      id: '/_authenticated/home'
-      path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof AuthenticatedHomeRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/horoscope': {
-      id: '/_authenticated/horoscope'
-      path: '/horoscope'
-      fullPath: '/horoscope'
-      preLoaderRoute: typeof AuthenticatedHoroscopeRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/kundli': {
-      id: '/_authenticated/kundli'
-      path: '/kundli'
-      fullPath: '/kundli'
-      preLoaderRoute: typeof AuthenticatedKundliRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/match': {
-      id: '/_authenticated/match'
-      path: '/match'
-      fullPath: '/match'
-      preLoaderRoute: typeof AuthenticatedMatchRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/onboarding': {
-      id: '/_authenticated/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/profile': {
-      id: '/_authenticated/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+    '/_authenticated/wallet': {
+      id: '/_authenticated/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof AuthenticatedWalletRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/tarot': {
@@ -289,25 +254,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTarotRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/wallet': {
-      id: '/_authenticated/wallet'
-      path: '/wallet'
-      fullPath: '/wallet'
-      preLoaderRoute: typeof AuthenticatedWalletRouteImport
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/api/chat': {
-      id: '/api/chat'
-      path: '/api/chat'
-      fullPath: '/api/chat'
-      preLoaderRoute: typeof ApiChatRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/astrologer/$slug': {
-      id: '/_authenticated/astrologer/$slug'
-      path: '/astrologer/$slug'
-      fullPath: '/astrologer/$slug'
-      preLoaderRoute: typeof AuthenticatedAstrologerSlugRouteImport
+    '/_authenticated/match': {
+      id: '/_authenticated/match'
+      path: '/match'
+      fullPath: '/match'
+      preLoaderRoute: typeof AuthenticatedMatchRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/kundli': {
+      id: '/_authenticated/kundli'
+      path: '/kundli'
+      fullPath: '/kundli'
+      preLoaderRoute: typeof AuthenticatedKundliRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/horoscope': {
+      id: '/_authenticated/horoscope'
+      path: '/horoscope'
+      fullPath: '/horoscope'
+      preLoaderRoute: typeof AuthenticatedHoroscopeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/home': {
+      id: '/_authenticated/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthenticatedHomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/chat/$slug': {
@@ -315,6 +308,13 @@ declare module '@tanstack/react-router' {
       path: '/chat/$slug'
       fullPath: '/chat/$slug'
       preLoaderRoute: typeof AuthenticatedChatSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/astrologer/$slug': {
+      id: '/_authenticated/astrologer/$slug'
+      path: '/astrologer/$slug'
+      fullPath: '/astrologer/$slug'
+      preLoaderRoute: typeof AuthenticatedAstrologerSlugRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
