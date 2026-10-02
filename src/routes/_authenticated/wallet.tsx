@@ -49,7 +49,7 @@ function WalletPage() {
         <WalletIcon className="mx-auto h-8 w-8 text-accent" />
         <div className="mt-3 text-[11px] uppercase tracking-widest text-muted-foreground">Balance</div>
         <div className="font-display mt-1 text-5xl font-bold text-accent">₹{balanceInr}</div>
-        <p className="mt-2 text-xs text-muted-foreground">1 free message with every astrologer.</p>
+        <p className="mt-2 text-xs text-muted-foreground">2 free minutes with every astrologer.</p>
       </section>
 
       <h2 className="font-display mt-8 text-sm font-semibold text-muted-foreground">Add money</h2>
