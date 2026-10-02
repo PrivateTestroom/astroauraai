@@ -17,8 +17,9 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   return (
-    <main className="relative z-10 mx-auto flex min-h-screen max-w-md flex-col px-6 py-10">
+    <main className="relative z-10 mx-auto flex min-h-screen max-w-md flex-col px-6 pt-10 pb-32">
       <div className="flex flex-1 flex-col items-center justify-center text-center">
+
         <AppLogo size={120} />
         <h1 className="font-display mt-8 text-5xl font-bold leading-tight">
           Astro<span className="text-accent">Aura</span>
