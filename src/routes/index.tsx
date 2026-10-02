@@ -37,7 +37,8 @@ function Landing() {
         </div>
       </div>
 
-      <div className="mt-8 space-y-3">
+      <div className="mt-6 space-y-3">
+
         <Link
           to="/auth"
           search={{ mode: "signup" }}
