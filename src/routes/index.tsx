@@ -17,18 +17,19 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   return (
-    <main className="relative z-10 mx-auto flex min-h-screen max-w-md flex-col px-6 pt-6 pb-40">
+    <main className="relative z-10 mx-auto flex min-h-screen max-w-md flex-col px-6 pt-4 pb-40">
       <div className="flex flex-1 flex-col items-center justify-center text-center">
-        <AppLogo size={88} />
-        <h1 className="font-display mt-6 text-4xl font-bold leading-tight">
+        <AppLogo size={72} />
+        <h1 className="font-display mt-4 text-4xl font-bold leading-tight">
           Astro<span className="text-accent">Aura</span>
-          <span className="mt-2 block text-xl font-normal text-muted-foreground">AI Astrologers, real guidance.</span>
+          <span className="mt-1.5 block text-lg font-normal text-muted-foreground">AI Astrologers, real guidance.</span>
         </h1>
-        <p className="mt-4 max-w-xs text-sm text-muted-foreground">
+        <p className="mt-3 max-w-xs text-[13px] leading-snug text-muted-foreground">
           Vedic · KP · Hellenistic · Tarot · Numerology — synthesized by AI trained on classical systems. Your first minute is free.
         </p>
 
-        <div className="mt-6 grid w-full grid-cols-3 gap-3 text-xs">
+        <div className="mt-5 grid w-full grid-cols-3 gap-3 text-xs">
+
 
           <Feature icon={MessageCircle} label="Chat 1-on-1" />
           <Feature icon={Sparkles} label="Daily horoscope" />
