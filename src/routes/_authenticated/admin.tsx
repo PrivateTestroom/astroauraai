@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useIsAdmin } from "@/lib/profile";
@@ -8,7 +8,7 @@ import {
   adminListRecentThreads, adminResetThreadFreeWindow,
 } from "@/lib/admin.functions";
 import { ArrowLeft, Users, Wallet, MessageSquare, Sparkles, Plus, Minus, Settings2, Trash2, RefreshCcw } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -18,8 +18,11 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminPage() {
   const { data: isAdmin, isLoading: roleLoading } = useIsAdmin();
-  if (roleLoading) return <main className="px-6 py-10 text-center text-muted-foreground">Checking access…</main>;
-  if (!isAdmin) throw redirect({ to: "/home" });
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!roleLoading && !isAdmin) navigate({ to: "/home", replace: true });
+  }, [isAdmin, navigate, roleLoading]);
+  if (roleLoading || !isAdmin) return <main className="px-6 py-10 text-center text-muted-foreground">Checking access…</main>;
 
   return <AdminBody />;
 }
