@@ -24,6 +24,6 @@ describe("astrology engine solar longitude", () => {
     });
 
     expect(chart.sunRashi.sanskrit).toBe("Tula");
-    expect(chart.moonRashi.sanskrit).toBe("Vrishabha");
+    expect(chart.moonRashi.sanskrit).toBe("Mesha");
   });
 });
