@@ -1,4 +1,5 @@
-import { describe, expect, it } from "bun:test";
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
 import { Body, SunPosition } from "astronomy-engine";
 import { computeChart, siderealLongitude } from "./engine";
 import { lahiriAyanamsa, norm360 } from "./constants";
@@ -8,7 +9,7 @@ describe("astrology engine solar longitude", () => {
     const date = new Date("2026-10-09T06:00:00.000Z");
     const expected = norm360(SunPosition(date).elon - lahiriAyanamsa(date));
 
-    expect(siderealLongitude(Body.Sun, date)).toBeCloseTo(expected, 8);
+    assert.ok(Math.abs(siderealLongitude(Body.Sun, date) - expected) < 1e-8);
   });
 
   it("computes a complete daily chart without throwing on the Sun", () => {
@@ -23,7 +24,7 @@ describe("astrology engine solar longitude", () => {
       timeKnown: true,
     });
 
-    expect(chart.sunRashi.sanskrit).toBe("Tula");
-    expect(chart.moonRashi.sanskrit).toBe("Mesha");
+    assert.equal(chart.sunRashi.sanskrit, "Tula");
+    assert.equal(chart.moonRashi.sanskrit, "Mesha");
   });
 });
