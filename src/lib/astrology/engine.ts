@@ -1,5 +1,5 @@
 // Pure-JS astrology engine using astronomy-engine. Worker-safe.
-import { Body, Observer, EclipticLongitude, SiderealTime, MakeTime } from "astronomy-engine";
+import { Body, Observer, EclipticLongitude, SiderealTime, MakeTime, SunPosition } from "astronomy-engine";
 
 export const RASHIS = [
   "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
@@ -30,6 +30,9 @@ export function lahiriAyanamsa(date: Date): number {
 function norm360(x: number) { return ((x % 360) + 360) % 360; }
 
 export function siderealLongitude(body: Body, date: Date): number {
+  if (body === Body.Sun) {
+    return norm360(SunPosition(date).elon - lahiriAyanamsa(date));
+  }
   const t = MakeTime(date);
   const trop = EclipticLongitude(body, t);
   return norm360(trop - lahiriAyanamsa(date));
