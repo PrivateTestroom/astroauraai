@@ -8,16 +8,26 @@ import { streamChatWithFallback } from "@/lib/gemini.server";
 
 type Body = { messages?: UIMessage[]; threadId?: string };
 
+// CORS: lets externally hosted copies of this frontend (GitHub Pages, Bolt, etc.)
+// use this server's AI keys. Auth is still enforced via the user's bearer token.
+const CORS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, content-type",
+  "Access-Control-Expose-Headers": "*",
+};
+
 function jsonError(error: string, message: string, status: number) {
   return new Response(JSON.stringify({ error, message }), {
     status,
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...CORS },
   });
 }
 
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
+      OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
       POST: async ({ request }) => {
         const auth = request.headers.get("authorization");
         if (!auth?.startsWith("Bearer ")) return jsonError("unauthorized", "Please sign in again.", 401);
@@ -120,6 +130,7 @@ ${chartCtx}`;
         }
 
         return result.toUIMessageStreamResponse({
+          headers: CORS,
           originalMessages: messages,
           onFinish: async ({ messages: finalMessages }) => {
             const assistant = finalMessages[finalMessages.length - 1];

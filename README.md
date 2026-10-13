@@ -1,26 +1,32 @@
-# Project Spark
+# AstroAura AI
 
-Hello lovable...below i am going to mention my whole project and i want you to try to complete it in one go..ready?
+Astrotalk-style AI astrology app (PWA). Stack: TanStack Start v1, React 19, Vite 7, Tailwind CSS v4.
 
-This project was built with [Lovable](https://lovable.dev).
+## Zero-setup takeover (Bolt.new, Cursor, any agent)
 
-**Live app**: https://astroauraai.lovable.app
+Nothing needs to be configured:
 
-## Build with Lovable
+- **Database / Auth / Storage** — `.env` is committed with the publishable URL + key of the live backend. Users, wallets, chats, astrologers all already live there.
+- **AI chat (Gemini)** — the secret keys stay on the live server `https://astroauraai.lovable.app`. When this frontend runs anywhere other than Lovable, chat automatically calls `https://astroauraai.lovable.app/api/chat` (CORS enabled, user's login token is forwarded). Override with `VITE_CHAT_API_URL` if needed.
+- Never commit real secret keys (Google auto-revokes leaked Gemini keys). If you self-host the server routes, set `GEMINI_API_KEY` (and optionally `LOVABLE_API_KEY`) as server env vars.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/7bd10eef-cb08-4512-b13b-ea76a6732f0f).
+## Map of the code
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+- `src/lib/astrology/` — deterministic engine (astronomy-engine, Lahiri ayanamsa): Parashara, KP, Hellenistic, Panchang, Ashtakoot guna milan. Tests: `engine.test.ts`.
+- `src/lib/ai/astrology-context.ts` — turns computed chart into AI prompt context (AI interprets, never recalculates).
+- `src/routes/api/chat.ts` — streaming chat endpoint, auth + per-minute billing (2 free min/thread; debits currently bypassed = free).
+- `src/lib/gemini.server.ts` — model fallback: Gemini key → Lovable AI Gateway.
+- `src/routes/_authenticated/*` — home, chat, horoscope, kundli, match, tarot, wallet, profile, admin.
+- `src/lib/*.functions.ts` — server functions (createServerFn).
+- `src/routes/__root.tsx` — layout, WhatsApp support button (https://wa.link/eyvvsn), PWA install prompt.
 
-## Development
+## Pending
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Real payments (plan: Topmate redirect + manual admin credit), lighter "Celestial Dawn" redesign, wallet shown in minutes (~₹20/min reference).
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+## Run
+
+```
+bun install
+bun run dev
 ```
