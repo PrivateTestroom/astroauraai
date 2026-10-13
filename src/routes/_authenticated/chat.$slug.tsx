@@ -68,7 +68,11 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
   const initialIds = useMemo(() => new Set(initialMessages.map((m) => m.id)), [initialMessages]);
 
   const transport = useMemo(() => new DefaultChatTransport({
-    api: "/api/chat",
+    // Off-Lovable hosts (Bolt, GitHub Pages) fall back to the live AstroAura server,
+    // which holds the Gemini + Lovable AI keys. On Lovable itself, same-origin is used.
+    api: import.meta.env.VITE_CHAT_API_URL || (typeof window !== "undefined" && !/lovable\.(app|dev)$|localhost$/.test(window.location.hostname)
+      ? "https://astroauraai.lovable.app/api/chat"
+      : "/api/chat"),
     fetch: async (url, init) => {
       const { data } = await supabase.auth.getSession();
       const headers = new Headers(init?.headers);
