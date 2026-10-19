@@ -68,22 +68,22 @@ function HomePage() {
     <main className="relative z-10 mx-auto max-w-md px-5 pb-32 pt-8 space-y-8 lg:pr-24 lg:pb-16">
       <header className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <AppLogo size={36} />
+          <AppLogo size={40} />
           <div className="min-w-0">
-            <h1 className="font-display truncate text-lg font-semibold leading-tight">
+            <h1 className="font-display truncate text-xl font-semibold leading-tight text-foreground">
               Namaste{profile.data?.full_name ? `, ${profile.data.full_name.split(" ")[0]}` : ""}
             </h1>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">The sky is open</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">The sky is open</p>
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {isAdmin && (
-            <Link to="/admin" aria-label="Admin" className="glass flex items-center justify-center rounded-full p-2 text-accent">
-              <Shield className="h-3.5 w-3.5" />
+            <Link to="/admin" aria-label="Admin" className="glass flex items-center justify-center rounded-full p-2.5 text-primary">
+              <Shield className="h-4 w-4" />
             </Link>
           )}
-          <Link to="/wallet" className="glass flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap">
-            <Wallet className="h-3.5 w-3.5 text-accent" />
+          <Link to="/wallet" className="glass flex items-center gap-1.5 rounded-full px-3.5 py-2.5 text-sm font-semibold text-foreground whitespace-nowrap">
+            <Wallet className="h-4 w-4 text-primary" />
             ₹{balanceInr}
           </Link>
         </div>
@@ -94,44 +94,44 @@ function HomePage() {
       <CosmicPulse />
 
       <section className="grid grid-cols-3 gap-3 text-center">
-        <Link to="/horoscope" className="glass rounded-2xl px-2 py-5">
-          <div className="text-2xl">☀️</div>
-          <div className="font-display mt-2 text-[12px] tracking-wide">Horoscope</div>
+        <Link to="/horoscope" className="glass rounded-2xl px-2 py-6 transition hover:-translate-y-0.5">
+          <div className="text-3xl">☀️</div>
+          <div className="font-display mt-2 text-sm font-semibold text-foreground">Horoscope</div>
           {streak.count > 0 && (
-            <div className="mt-1.5 flex items-center justify-center gap-0.5 text-[9px] font-semibold text-accent">
-              <Flame className="h-2.5 w-2.5" /> {streak.count}d streak
+            <div className="mt-1.5 flex items-center justify-center gap-1 text-[11px] font-semibold text-primary">
+              <Flame className="h-3 w-3" /> {streak.count}d streak
             </div>
           )}
         </Link>
-        <Link to="/kundli" className="glass rounded-2xl px-2 py-5">
-          <div className="text-2xl">🪐</div>
-          <div className="font-display mt-2 text-[12px] tracking-wide">Kundli</div>
+        <Link to="/kundli" className="glass rounded-2xl px-2 py-6 transition hover:-translate-y-0.5">
+          <div className="text-3xl">🪐</div>
+          <div className="font-display mt-2 text-sm font-semibold text-foreground">Kundli</div>
         </Link>
-        <Link to="/match" className="glass rounded-2xl px-2 py-5">
-          <div className="text-2xl">💞</div>
-          <div className="font-display mt-2 text-[12px] tracking-wide">Matching</div>
+        <Link to="/match" className="glass rounded-2xl px-2 py-6 transition hover:-translate-y-0.5">
+          <div className="text-3xl">💞</div>
+          <div className="font-display mt-2 text-sm font-semibold text-foreground">Matching</div>
         </Link>
       </section>
 
       <section className="glass overflow-hidden rounded-2xl p-6">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-accent">Today's sky</div>
-        <h2 className="font-display mt-2 text-xl">Your daily reading</h2>
-        <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">Personalised from your chart — refreshed every morning.</p>
-        <Link to="/horoscope" className="mt-4 inline-block rounded-full border border-accent/40 px-4 py-1.5 text-xs font-semibold text-accent">
+        <div className="text-[11px] uppercase tracking-[0.18em] text-primary">Today's sky</div>
+        <h2 className="font-display mt-2 text-2xl font-semibold text-foreground">Your daily reading</h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Personalised from your chart — refreshed every morning.</p>
+        <Link to="/horoscope" className="mt-4 inline-block rounded-full border border-primary/45 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/15">
           Open today →
         </Link>
       </section>
 
       {astrologers.isLoading && (
         <div className="grid gap-4">
-          {[1, 2, 3].map((i) => <div key={i} className="h-24 animate-pulse rounded-2xl bg-white/3" />)}
+          {[1, 2, 3].map((i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-secondary/60" />)}
         </div>
       )}
 
       {recommended.length > 0 && (
         <section>
-          <h2 className="font-display mb-5 flex items-center gap-2 text-sm font-semibold text-accent">
-            <span className="h-px w-6 bg-accent/40" /> Featured astrologers
+          <h2 className="font-display mb-5 flex items-center gap-2 text-base font-semibold text-primary">
+            <span className="h-px w-6 bg-primary/45" /> Featured astrologers
           </h2>
           <div className="space-y-5">
             {recommended.map((a) => <AstrologerCard key={a.id} a={a} />)}
@@ -141,8 +141,8 @@ function HomePage() {
 
       {others.length > 0 && (
         <section>
-          <h2 className="font-display mb-5 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-            <span className="h-px w-6 bg-white/20" /> All astrologers
+          <h2 className="font-display mb-5 flex items-center gap-2 text-base font-semibold text-muted-foreground">
+            <span className="h-px w-6 bg-border" /> All astrologers
           </h2>
           <div className="space-y-5">
             {others.map((a) => <AstrologerCard key={a.id} a={a} />)}

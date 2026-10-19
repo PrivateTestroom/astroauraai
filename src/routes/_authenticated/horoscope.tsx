@@ -27,8 +27,8 @@ function HoroscopePage() {
 
   return (
     <main className="relative z-10 mx-auto max-w-md px-5 pb-32 pt-8 lg:pr-20 lg:pb-10">
-      <div className="text-xs uppercase tracking-widest text-accent">{today}</div>
-      <h1 className="font-display mt-1 text-3xl font-bold">Your horoscope</h1>
+      <div className="text-xs uppercase tracking-widest text-primary">{today}</div>
+      <h1 className="font-display mt-1 text-3xl font-bold text-foreground">Your horoscope</h1>
 
       <PanchangWidget />
 
@@ -54,8 +54,8 @@ function HoroscopePage() {
       {horoscope.data && (
         <>
           <section className="glass mt-6 rounded-2xl p-5">
-            <Sparkles className="h-5 w-5 text-accent" />
-            <p className="mt-3 text-sm leading-relaxed">{horoscope.data.summary}</p>
+            <Sparkles className="h-5 w-5 text-primary" />
+            <p className="mt-3 text-[15px] leading-relaxed text-foreground">{horoscope.data.summary}</p>
           </section>
 
           <div className="mt-4 grid gap-3">
@@ -75,8 +75,8 @@ function HoroscopePage() {
 function ChartChip({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="font-display mt-1 text-sm font-semibold">{value}</div>
+      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="font-display mt-1 text-base font-semibold text-foreground">{value}</div>
     </div>
   );
 }
@@ -85,10 +85,10 @@ function Card({ icon: Icon, title, body }: { icon: typeof Heart; title: string; 
   if (!body) return null;
   return (
     <div className="glass flex gap-3 rounded-2xl p-4">
-      <Icon className="h-4 w-4 shrink-0 text-accent" />
+      <Icon className="h-5 w-5 shrink-0 text-primary" />
       <div>
-        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{title}</div>
-        <div className="mt-0.5 text-sm">{body}</div>
+        <div className="text-xs uppercase tracking-wider text-muted-foreground">{title}</div>
+        <div className="mt-1 text-[15px] leading-relaxed text-foreground">{body}</div>
       </div>
     </div>
   );

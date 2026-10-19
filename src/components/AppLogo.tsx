@@ -7,7 +7,7 @@ export function AppLogo({ size = 40 }: { size?: number }) {
       alt="AstroAura AI"
       width={size}
       height={size}
-      className="drop-shadow-[0_0_18px_rgba(168,85,247,0.6)] animate-float"
+      className="drop-shadow-[0_4px_14px_oklch(0.62_0.14_55_/_0.35)] animate-float"
     />
   );
 }

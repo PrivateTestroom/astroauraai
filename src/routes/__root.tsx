@@ -22,7 +22,7 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
+        <h1 className="font-display text-7xl font-bold text-primary">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           The page you're looking for doesn't exist or has been moved.
@@ -30,7 +30,7 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:brightness-105"
           >
             Go home
           </Link>
@@ -50,7 +50,7 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+        <h1 className="font-display text-xl font-semibold tracking-tight text-foreground">
           This page didn't load
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -62,13 +62,13 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:brightness-105"
           >
             Try again
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex items-center justify-center rounded-xl border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
           >
             Go home
           </a>
@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#0A0A23" },
+      { name: "theme-color", content: "#FBF8F1" },
       { title: "AstroAura AI — Talk to AI Astrologers" },
       { name: "description", content: "Chat with AI astrologers trained in Vedic, KP, Hellenistic and Tarot. Daily horoscope, birth chart, real spiritual guidance." },
       { property: "og:title", content: "AstroAura AI — Talk to AI Astrologers" },
@@ -112,8 +112,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  // Light theme by default — no forced dark class.
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
@@ -140,7 +141,6 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <ScrollToTop />
       <Outlet />
       <SupportBadgeMask />
@@ -165,7 +165,7 @@ function SupportBadgeMask() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Contact AstroAura support on WhatsApp"
-      className="fixed bottom-24 right-3 z-[2147483647] flex h-[44px] items-center justify-center gap-2 rounded-full border border-accent/30 bg-background/95 px-4 text-accent shadow-lg backdrop-blur transition hover:scale-[1.02] hover:bg-secondary lg:bottom-4 lg:right-4 lg:h-[56px] lg:gap-3 lg:rounded-2xl lg:px-6"
+      className="fixed bottom-24 right-3 z-[2147483647] flex h-[48px] items-center justify-center gap-2 rounded-full border border-primary/30 bg-card/95 px-4 text-primary shadow-lg backdrop-blur transition hover:scale-[1.03] hover:bg-secondary lg:bottom-4 lg:right-4 lg:h-[56px] lg:gap-3 lg:rounded-2xl lg:px-6"
     >
       <MessageCircleQuestion className="h-5 w-5 shrink-0 lg:h-6 lg:w-6" />
       <span className="whitespace-nowrap text-sm font-semibold lg:hidden">Support</span>

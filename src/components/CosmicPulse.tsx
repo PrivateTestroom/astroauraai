@@ -16,18 +16,18 @@ export function CosmicPulse() {
 
   if (retro.length === 0) {
     return (
-      <div className="glass mt-3 flex items-center gap-2 rounded-2xl px-4 py-2.5 text-[11px]">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+      <div className="glass mt-3 flex items-center gap-2 rounded-2xl px-4 py-3 text-sm">
+        <span className="h-2 w-2 rounded-full bg-emerald-500" />
         <span className="text-muted-foreground">Sky is direct — no major planets in retrograde right now.</span>
       </div>
     );
   }
 
   return (
-    <div className="glass mt-3 flex items-center gap-2 rounded-2xl border-accent/25 px-4 py-2.5 text-[11px]">
-      <Flame className="h-3.5 w-3.5 shrink-0 text-accent" />
+    <div className="glass mt-3 flex items-center gap-2 rounded-2xl border-primary/25 px-4 py-3 text-sm">
+      <Flame className="h-4 w-4 shrink-0 text-primary" />
       <span className="truncate">
-        <span className="font-semibold text-accent">{retro.join(" · ")}</span>{" "}
+        <span className="font-semibold text-primary">{retro.join(" · ")}</span>{" "}
         <span className="text-muted-foreground">retrograde today — read before the shift.</span>
       </span>
     </div>
