@@ -44,7 +44,6 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
   const [freeStartedAt, setFreeStartedAt] = useState<string | null>(session.freeStartedAt);
   const [now, setNow] = useState(() => Date.now());
 
-  // Tick countdown every second while free window is active
   useEffect(() => {
     if (!freeStartedAt) return;
     const started = new Date(freeStartedAt).getTime();
@@ -68,52 +67,48 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
   const initialIds = useMemo(() => new Set(initialMessages.map((m) => m.id)), [initialMessages]);
 
   const transport = useMemo(() => new DefaultChatTransport({
-    // Off-Lovable hosts (Bolt, GitHub Pages) fall back to the live AstroAura server,
-    // which holds the Gemini + Lovable AI keys. On Lovable itself, same-origin is used.
     api: import.meta.env.VITE_CHAT_API_URL || (typeof window !== "undefined" && !/lovable\.(app|dev)$|localhost$/.test(window.location.hostname)
       ? "https://astroauraai.lovable.app/api/chat"
       : "/api/chat"),
     fetch: async (url, init) => {
       const { data } = await supabase.auth.getSession();
       const headers = new Headers(init?.headers);
-      if (data.session) headers.set("Authorization", `Bearer ${data.session.access_token}`);
-      const body = init?.body ? JSON.parse(init.body as string) : {};
-      const res = await fetch(url, { ...init, headers, body: JSON.stringify({ ...body, threadId: session.threadId }) });
-      if (!res.ok) {
-        let errBody: { error?: string; message?: string } = {};
-        try { errBody = await res.clone().json(); } catch { /* not json */ }
-        const message = errBody.message || `Chat failed (${res.status})`;
-        if (res.status === 402) toast.error(message, { action: { label: "Top up", onClick: () => { window.location.href = "/wallet"; } } });
-        else if (res.status === 429) toast.error("Too many requests. Please wait a moment.");
-        else toast.error(message);
-        throw new Error(message);
-      }
-      return res;
+      if (data.session?.access_token) headers.set("Authorization", `Bearer ${data.session.access_token}`);
+      return fetch(url, { ...init, headers });
     },
-  }), [session.threadId]);
+  }), []);
 
-  const { messages, sendMessage, status } = useChat({
-    id: session.threadId,
-    messages: initialMessages,
+  const { messages, sendMessage, status, error } = useChat({
     transport,
-    onError: (e) => {
-      // Toast already shown in fetch wrapper for HTTP errors; only toast on bare stream errors.
-      if (e?.message && !e.message.startsWith("Chat failed")) toast.error(e.message);
-    },
-    onFinish: () => {
-      onBalanceRefresh();
-      // Refresh balance + free-window state from server
-      supabase.auth.getUser().then(async ({ data }) => {
-        if (!data.user) return;
-        const [{ data: b }, { data: t }] = await Promise.all([
-          supabase.from("wallet_balances").select("balance_paise").eq("user_id", data.user.id).maybeSingle(),
-          supabase.from("chat_threads").select("free_started_at").eq("id", session.threadId).maybeSingle(),
-        ]);
-        if (b) setBalance(b.balance_paise);
-        if (t && !freeStartedAt) setFreeStartedAt((t as { free_started_at?: string | null }).free_started_at ?? null);
-      });
-    },
+    messages: initialMessages,
+    onFinish: () => onBalanceRefresh(),
+    onError: () => toast.error("Connection hiccup — please try again."),
   });
+
+  useEffect(() => {
+    if (!session.data) return;
+    const ch = supabase.channel(`wallet:${session.data.threadId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "wallet_balances", filter: `user_id=eq.${session.data.userId}` }, (payload) => {
+        const b = payload.new as { balance_paise: number };
+        if (b) setBalance(b.balance_paise);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [session.data]);
+
+  useEffect(() => {
+    const t = setInterval(async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+      const [{ data: b }, { data: t }] = await Promise.all([
+        supabase.from("wallet_balances").select("balance_paise").eq("user_id", u.user.id).maybeSingle(),
+        supabase.from("chat_threads").select("free_started_at").eq("id", session.data?.threadId ?? "").maybeSingle(),
+      ]);
+      if (b) setBalance(b.balance_paise);
+      if (t && !freeStartedAt) setFreeStartedAt((t as { free_started_at?: string | null }).free_started_at ?? null);
+    }, 5000);
+    return () => clearInterval(t);
+  }, [session.data, freeStartedAt]);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [messages, status]);
@@ -134,38 +129,38 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
   return (
     <main className="relative z-10 mx-auto flex h-[100dvh] max-w-md flex-col px-3 pb-24 pt-3">
       <header className="glass flex items-center gap-3 rounded-2xl p-3">
-        <button onClick={navigateBack} className="text-muted-foreground"><ArrowLeft className="h-5 w-5" /></button>
+        <button onClick={navigateBack} className="text-muted-foreground transition hover:text-foreground"><ArrowLeft className="h-5 w-5" /></button>
         <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${session.astrologer.avatar_gradient} text-xl`}>
           {session.astrologer.avatar_emoji}
         </div>
         <div className="flex-1">
-          <div className="font-display font-semibold leading-tight">{session.astrologer.display_name}</div>
+          <div className="font-display font-semibold leading-tight text-foreground">{session.astrologer.display_name}</div>
           <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Online · ₹{(ratePaise / 100).toFixed(0)}/min
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Online · ₹{(ratePaise / 100).toFixed(0)}/min
           </div>
         </div>
-        <Link to="/wallet" className="flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1.5 text-[11px] font-semibold">
-          <Wallet className="h-3 w-3 text-accent" />₹{(balance / 100).toFixed(0)}
+        <Link to="/wallet" className="flex items-center gap-1 rounded-full border border-border bg-card/60 px-2.5 py-1.5 text-[11px] font-semibold text-foreground">
+          <Wallet className="h-3 w-3 text-primary" />₹{(balance / 100).toFixed(0)}
         </Link>
       </header>
 
       {freeActive ? (
         <FreeCountdown mm={mm} ss={ss} totalMs={freeRemainingMs} ratePaise={ratePaise} />
       ) : balance < ratePaise ? (
-        <Link to="/wallet" className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-[11px] text-destructive">
+        <Link to="/wallet" className="mt-2 flex items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/8 px-3 py-2 text-[11px] text-destructive">
           <span>Free trial ended. Top up to continue.</span>
           <span className="font-semibold">Top up →</span>
         </Link>
       ) : (
-        <div className="mt-2 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-muted-foreground">
-          <Sparkles className="h-3 w-3 text-accent" /> ₹{(ratePaise / 100).toFixed(0)}/minute
+        <div className="mt-2 flex items-center gap-2 rounded-xl border border-border bg-card/50 px-3 py-2 text-[11px] text-muted-foreground">
+          <Sparkles className="h-3 w-3 text-primary" /> ₹{(ratePaise / 100).toFixed(0)}/minute
         </div>
       )}
 
       <div ref={scrollRef} className="mt-3 flex-1 space-y-3 overflow-y-auto pb-4">
         {messages.length === 0 && (
           <div className="glass mt-4 rounded-2xl p-5 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2 text-accent"><Sparkles className="h-4 w-4" /> <span className="font-display text-base text-foreground">Namaste 🙏</span></div>
+            <div className="flex items-center gap-2 text-primary"><Sparkles className="h-4 w-4" /> <span className="font-display text-base text-foreground">Namaste 🙏</span></div>
             <p className="mt-2 leading-relaxed">
               Share what's on your mind — career, love, marriage, a decision you're weighing, or a name/date you want me to read against your chart. Specific questions give the sharpest answers.
             </p>
@@ -200,7 +195,7 @@ function ChatBoot({ session, slug, onBalanceRefresh, navigateBack }: { session: 
           placeholder={!freeActive && balance < ratePaise ? "Top up to continue…" : "Ask your astrologer…"}
           className="max-h-32 flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground"
         />
-        <button type="submit" disabled={!canSend} className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground disabled:opacity-40">
+        <button type="submit" disabled={!canSend} className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground disabled:opacity-40">
           <Send className="h-4 w-4" />
         </button>
       </form>
@@ -242,15 +237,15 @@ function Bubble({ m, astroEmoji, streaming, reveal }: { m: UIMessage; astroEmoji
   const stillWriting = !isUser && (streaming || revealed.length < fullText.length);
   return (
     <div className={`flex gap-2 ${isUser ? "justify-end" : "justify-start"}`}>
-      {!isUser && <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/5 text-sm">{astroEmoji}</div>}
-      <div className={`max-w-[78%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${isUser ? "bg-primary text-primary-foreground" : "glass text-foreground"}`}>
+      {!isUser && <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-card text-sm ring-1 ring-border">{astroEmoji}</div>}
+      <div className={`max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${isUser ? "bg-primary text-primary-foreground" : "glass text-foreground"}`}>
         {isUser ? (
           text
         ) : (
           <>
-            <div className="prose prose-sm prose-invert max-w-none [&_p]:my-1"><ReactMarkdown>{text || "…"}</ReactMarkdown></div>
+            <div className="prose prose-sm max-w-none [&_p]:my-1 [&_strong]:text-foreground"><ReactMarkdown>{text || "…"}</ReactMarkdown></div>
             {stillWriting && (
-              <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-accent/80">
+              <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-primary/70">
                 <Feather className="h-3 w-3 animate-[writing_1.4s_ease-in-out_infinite]" />
                 <span className="italic">writing…</span>
               </div>
@@ -265,24 +260,23 @@ function Bubble({ m, astroEmoji, streaming, reveal }: { m: UIMessage; astroEmoji
 function Typing() {
   return (
     <div className="glass flex items-center gap-1.5 rounded-2xl px-3 py-2">
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent" style={{ animationDelay: "0ms" }} />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent" style={{ animationDelay: "120ms" }} />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent" style={{ animationDelay: "240ms" }} />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary" style={{ animationDelay: "0ms" }} />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary" style={{ animationDelay: "120ms" }} />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary" style={{ animationDelay: "240ms" }} />
     </div>
   );
 }
 
 function FreeCountdown({ mm, ss, totalMs, ratePaise }: { mm: number; ss: string; totalMs: number; ratePaise: number }) {
-  // Colour states: green > 30s, amber ≤ 30s, red ≤ 10s.
   const warning = totalMs <= 30_000;
   const critical = totalMs <= 10_000;
   const tone = critical
-    ? "border-red-400/50 bg-red-500/15 text-red-200"
+    ? "border-red-400/50 bg-red-500/10 text-red-700"
     : warning
-    ? "border-amber-400/50 bg-amber-500/15 text-amber-200"
-    : "border-accent/30 bg-accent/10 text-accent";
+    ? "border-amber-400/50 bg-amber-500/10 text-amber-700"
+    : "border-primary/25 bg-primary/8 text-primary";
   const pct = Math.max(0, Math.min(100, (totalMs / (2 * 60_000)) * 100));
-  const barTone = critical ? "bg-red-400" : warning ? "bg-amber-400" : "bg-accent";
+  const barTone = critical ? "bg-red-500" : warning ? "bg-amber-500" : "bg-primary";
   return (
     <div className={`mt-2 rounded-xl border px-3 py-2 text-[11px] ${tone}`}>
       <div className="flex items-center justify-between gap-2">
@@ -294,13 +288,13 @@ function FreeCountdown({ mm, ss, totalMs, ratePaise }: { mm: number; ss: string;
           {mm}:{ss} left · then ₹{(ratePaise / 100).toFixed(0)}/min
         </span>
       </div>
-      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/10">
+      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-border/50">
         <div className={`h-full transition-all duration-1000 ${barTone}`} style={{ width: `${pct}%` }} />
       </div>
       {warning && (
         <Link
           to="/wallet"
-          className="mt-2 flex items-center justify-center gap-1.5 rounded-lg bg-black/40 px-3 py-1.5 text-[11px] font-semibold text-accent transition hover:bg-black/60"
+          className="mt-2 flex items-center justify-center gap-1.5 rounded-lg border border-border bg-card/60 px-3 py-1.5 text-[11px] font-semibold text-primary transition hover:bg-secondary"
         >
           <Wallet className="h-3 w-3" /> Add ₹99 to keep the flow →
         </Link>
