@@ -22,13 +22,13 @@ function HoroscopePage() {
   const chart = useQuery({ queryKey: ["my-chart"], queryFn: () => cFn({}) });
   const today = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
 
-  // Count today's visit toward the daily streak.
   useEffect(() => { bumpStreak(); }, []);
 
   return (
-    <main className="relative z-10 mx-auto max-w-md px-5 pb-32 pt-8 lg:pr-20 lg:pb-10">
-      <div className="text-xs uppercase tracking-widest text-primary">{today}</div>
+    <main className="relative z-10 mx-auto max-w-md px-5 pb-32 pt-7 lg:pr-20 lg:pb-10">
+      <div className="text-xs font-medium uppercase tracking-wider text-primary">{today}</div>
       <h1 className="font-display mt-1 text-3xl font-bold text-foreground">Your horoscope</h1>
+      <p className="mt-1 text-sm text-muted-foreground">Based on your birth chart — refreshed every morning.</p>
 
       <PanchangWidget />
 
@@ -47,14 +47,17 @@ function HoroscopePage() {
       )}
       {horoscope.isError && (
         <div className="glass mt-6 rounded-2xl p-5 text-center text-sm text-muted-foreground">
-          Couldn't read the sky right now. Pull to refresh in a moment.
+          Couldn't read the sky right now. Try again in a moment.
         </div>
       )}
 
       {horoscope.data && (
         <>
           <section className="glass mt-6 rounded-2xl p-5">
-            <Sparkles className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Today's summary</span>
+            </div>
             <p className="mt-3 text-[15px] leading-relaxed text-foreground">{horoscope.data.summary}</p>
           </section>
 
@@ -87,7 +90,7 @@ function Card({ icon: Icon, title, body }: { icon: typeof Heart; title: string; 
     <div className="glass flex gap-3 rounded-2xl p-4">
       <Icon className="h-5 w-5 shrink-0 text-primary" />
       <div>
-        <div className="text-xs uppercase tracking-wider text-muted-foreground">{title}</div>
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</div>
         <div className="mt-1 text-[15px] leading-relaxed text-foreground">{body}</div>
       </div>
     </div>

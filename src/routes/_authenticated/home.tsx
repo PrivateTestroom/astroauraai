@@ -17,11 +17,22 @@ export const Route = createFileRoute("/_authenticated/home")({
   component: HomePage,
 });
 
+const FILTERS = [
+  { key: "all", label: "All", icon: "✨" },
+  { key: "Love", label: "Love", icon: "❤️" },
+  { key: "Career", label: "Career", icon: "💼" },
+  { key: "Marriage", label: "Marriage", icon: "💍" },
+  { key: "Finance", label: "Money", icon: "💰" },
+] as const;
+
+type FilterKey = (typeof FILTERS)[number]["key"];
+
 function HomePage() {
   const profile = useProfile();
   const { data: isAdmin } = useIsAdmin();
   const navigate = useNavigate();
   const [streak, setStreak] = useState({ count: 0, lastDay: "" });
+  const [filter, setFilter] = useState<FilterKey>("all");
   useEffect(() => { setStreak(readStreak()); }, []);
   const wallet = useQuery({
     queryKey: ["wallet"],
@@ -61,19 +72,21 @@ function HomePage() {
   }
 
   const balanceInr = wallet.data ? (wallet.data.balance_paise / 100).toFixed(0) : "0";
-  const recommended = astrologers.data?.filter((a) => a.is_recommended) ?? [];
-  const others = astrologers.data?.filter((a) => !a.is_recommended) ?? [];
+  const all = astrologers.data ?? [];
+  const filtered = filter === "all" ? all : all.filter((a) => (a.specialties ?? []).includes(filter));
+  const recommended = filtered.filter((a) => a.is_recommended);
+  const others = filtered.filter((a) => !a.is_recommended);
 
   return (
-    <main className="relative z-10 mx-auto max-w-md px-5 pb-32 pt-8 space-y-8 lg:pr-24 lg:pb-16">
+    <main className="relative z-10 mx-auto max-w-md px-5 pb-32 pt-7 space-y-6 lg:pr-24 lg:pb-16">
       <header className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <AppLogo size={40} />
+          <AppLogo size={38} />
           <div className="min-w-0">
             <h1 className="font-display truncate text-xl font-semibold leading-tight text-foreground">
               Namaste{profile.data?.full_name ? `, ${profile.data.full_name.split(" ")[0]}` : ""}
             </h1>
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">The sky is open</p>
+            <p className="text-xs text-muted-foreground">Choose an astrologer to start</p>
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -89,65 +102,79 @@ function HomePage() {
         </div>
       </header>
 
-      <div className="gold-divider" />
-
       <CosmicPulse />
 
       <section className="grid grid-cols-3 gap-3 text-center">
-        <Link to="/horoscope" className="glass rounded-2xl px-2 py-6 transition hover:-translate-y-0.5">
-          <div className="text-3xl">☀️</div>
+        <Link to="/horoscope" className="glass rounded-2xl px-2 py-5 transition hover:-translate-y-0.5 active:scale-[0.98]">
+          <div className="text-2xl">☀️</div>
           <div className="font-display mt-2 text-sm font-semibold text-foreground">Horoscope</div>
           {streak.count > 0 && (
-            <div className="mt-1.5 flex items-center justify-center gap-1 text-[11px] font-semibold text-primary">
-              <Flame className="h-3 w-3" /> {streak.count}d streak
+            <div className="mt-1 flex items-center justify-center gap-1 text-[11px] font-semibold text-primary">
+              <Flame className="h-3 w-3" /> {streak.count}d
             </div>
           )}
         </Link>
-        <Link to="/kundli" className="glass rounded-2xl px-2 py-6 transition hover:-translate-y-0.5">
-          <div className="text-3xl">🪐</div>
+        <Link to="/kundli" className="glass rounded-2xl px-2 py-5 transition hover:-translate-y-0.5 active:scale-[0.98]">
+          <div className="text-2xl">🪐</div>
           <div className="font-display mt-2 text-sm font-semibold text-foreground">Kundli</div>
         </Link>
-        <Link to="/match" className="glass rounded-2xl px-2 py-6 transition hover:-translate-y-0.5">
-          <div className="text-3xl">💞</div>
+        <Link to="/match" className="glass rounded-2xl px-2 py-5 transition hover:-translate-y-0.5 active:scale-[0.98]">
+          <div className="text-2xl">💞</div>
           <div className="font-display mt-2 text-sm font-semibold text-foreground">Matching</div>
         </Link>
       </section>
 
-      <section className="glass overflow-hidden rounded-2xl p-6">
-        <div className="text-[11px] uppercase tracking-[0.18em] text-primary">Today's sky</div>
-        <h2 className="font-display mt-2 text-2xl font-semibold text-foreground">Your daily reading</h2>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Personalised from your chart — refreshed every morning.</p>
-        <Link to="/horoscope" className="mt-4 inline-block rounded-full border border-primary/45 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/15">
-          Open today →
-        </Link>
-      </section>
+      <div>
+        <h2 className="font-display mb-3 text-base font-semibold text-foreground">What do you need help with?</h2>
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
+          {FILTERS.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition active:scale-[0.97] ${
+                filter === f.key
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card/70 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <span className="text-base">{f.icon}</span> {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {astrologers.isLoading && (
         <div className="grid gap-4">
-          {[1, 2, 3].map((i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-secondary/60" />)}
+          {[1, 2, 3].map((i) => <div key={i} className="h-36 animate-pulse rounded-2xl bg-secondary/50" />)}
         </div>
       )}
 
       {recommended.length > 0 && (
         <section>
-          <h2 className="font-display mb-5 flex items-center gap-2 text-base font-semibold text-primary">
-            <span className="h-px w-6 bg-primary/45" /> Featured astrologers
+          <h2 className="font-display mb-3 flex items-center gap-2 text-sm font-semibold text-primary">
+            <span className="h-px w-5 bg-primary/40" /> Recommended for you
           </h2>
-          <div className="space-y-5">
+          <div className="space-y-4">
             {recommended.map((a) => <AstrologerCard key={a.id} a={a} />)}
           </div>
         </section>
-      )}
+      )
 
       {others.length > 0 && (
         <section>
-          <h2 className="font-display mb-5 flex items-center gap-2 text-base font-semibold text-muted-foreground">
-            <span className="h-px w-6 bg-border" /> All astrologers
+          <h2 className="font-display mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+            <span className="h-px w-5 bg-border" /> All astrologers
           </h2>
-          <div className="space-y-5">
+          <div className="space-y-4">
             {others.map((a) => <AstrologerCard key={a.id} a={a} />)}
           </div>
         </section>
+      )
+
+      {astrologers.isFetched && filtered.length === 0 && (
+        <div className="glass rounded-2xl p-6 text-center text-sm text-muted-foreground">
+          No astrologers found for this topic. Try "All" to see everyone.
+        </div>
       )}
 
       <BottomNav />
