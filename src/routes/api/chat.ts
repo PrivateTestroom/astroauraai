@@ -8,14 +8,14 @@ import { streamChatWithFallback } from "@/lib/gemini.server";
 
 type Body = { messages?: UIMessage[]; threadId?: string };
 
-// CORS: lets externally hosted copies of this frontend (GitHub Pages, Bolt, etc.)
-// use this server's AI keys. Auth is still enforced via the user's bearer token.
 const CORS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "authorization, content-type",
   "Access-Control-Expose-Headers": "*",
 };
+
+const LOVABLE_FALLBACK_URL = "https://astroauraai.lovable.app/api/chat";
 
 function jsonError(error: string, message: string, status: number) {
   return new Response(JSON.stringify({ error, message }), {
@@ -24,11 +24,48 @@ function jsonError(error: string, message: string, status: number) {
   });
 }
 
+function hasLocalAiKeys(): boolean {
+  return !!(process.env.GEMINI_API_KEY || process.env.LOVABLE_API_KEY);
+}
+
+async function proxyToLovable(request: Request): Promise<Response> {
+  const body = await request.text();
+  const headers = new Headers(request.headers);
+  headers.delete("host");
+  headers.delete("content-length");
+  try {
+    const upstream = await fetch(LOVABLE_FALLBACK_URL, {
+      method: "POST",
+      headers,
+      body,
+    });
+    const respHeaders = new Headers(CORS);
+    upstream.headers.forEach((v, k) => {
+      const lk = k.toLowerCase();
+      if (lk !== "transfer-encoding" && lk !== "content-encoding" && lk !== "content-length") {
+        respHeaders.set(k, v);
+      }
+    });
+    return new Response(upstream.body, {
+      status: upstream.status,
+      statusText: upstream.statusText,
+      headers: respHeaders,
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Failed to reach AI backend";
+    return jsonError("ai_unavailable", msg, 502);
+  }
+}
+
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
       POST: async ({ request }) => {
+        if (!hasLocalAiKeys()) {
+          return proxyToLovable(request);
+        }
+
         const auth = request.headers.get("authorization");
         if (!auth?.startsWith("Bearer ")) return jsonError("unauthorized", "Please sign in again.", 401);
         const token = auth.slice(7);
