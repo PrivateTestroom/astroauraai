@@ -72,7 +72,7 @@ function OnboardingPage() {
       <div className="flex items-center gap-3">
         <AppLogo size={44} />
         <div>
-          <h1 className="font-display text-2xl font-bold leading-tight">A few details</h1>
+          <h1 className="font-display text-2xl font-bold leading-tight text-foreground">A few details</h1>
           <p className="text-xs text-muted-foreground">So the astrologers can read your chart accurately.</p>
         </div>
       </div>
@@ -90,7 +90,7 @@ function OnboardingPage() {
                 type="button"
                 onClick={() => setGender(g)}
                 className={`rounded-xl border py-3 text-sm capitalize transition ${
-                  gender === g ? "border-primary bg-primary/20 text-foreground" : "border-white/15 bg-white/5 text-muted-foreground"
+                  gender === g ? "border-primary bg-primary/15 text-foreground" : "border-border bg-card/50 text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {g}
@@ -129,14 +129,14 @@ function OnboardingPage() {
 
         <Field label="Birth time">
           <div className="space-y-2">
-            <label className="flex items-start gap-2 rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-muted-foreground">
+            <label className="flex items-start gap-2 rounded-xl border border-border bg-card/50 p-3 text-xs text-muted-foreground">
               <input
                 type="checkbox"
                 checked={!timeKnown}
                 onChange={(e) => setTimeKnown(!e.target.checked)}
-                className="mt-0.5 h-4 w-4 accent-violet-500"
+                className="mt-0.5 h-4 w-4 accent-primary"
               />
-              <span>I don’t know my exact birth time — readings will still be ~80% accurate.</span>
+              <span>I don't know my exact birth time — readings will still be ~80% accurate.</span>
             </label>
             {timeKnown && (
               <input
@@ -153,7 +153,7 @@ function OnboardingPage() {
       <button
         onClick={save}
         disabled={saving}
-        className="mt-8 w-full rounded-2xl bg-primary py-4 font-semibold text-primary-foreground shadow-[0_8px_30px_-8px_rgba(168,85,247,0.7)] transition hover:brightness-110 disabled:opacity-60"
+        className="mt-8 w-full rounded-2xl bg-primary py-4 text-base font-semibold text-primary-foreground shadow-[0_8px_24px_-8px_oklch(0.55_0.16_48_/_0.5)] transition hover:brightness-105 disabled:opacity-60 active:scale-[0.98]"
       >
         {saving ? "Saving…" : "Reveal my chart"}
       </button>

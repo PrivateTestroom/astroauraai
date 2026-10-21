@@ -8,14 +8,14 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import "../lib/fonts";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
-import { MessageCircleQuestion } from "lucide-react";
+import { MessageCircleQuestion, X } from "lucide-react";
 import { InstallPrompt } from "@/components/InstallPrompt";
 
 function NotFoundComponent() {
@@ -92,14 +92,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "AstroAura AI — Talk to AI Astrologers" },
       { name: "twitter:description", content: "Chat with AI astrologers trained in Vedic, KP, Hellenistic and Tarot. Daily horoscope, birth chart, real spiritual guidance." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e4dc42ba-0a4a-4f80-93d1-7c5991be0dda/id-preview-167cb4a0--7bd10eef-cb08-4512-b13b-ea76a6732f0f.lovable.app-1781955324429.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e4dc42ba-0a4a-4f80-93d1-7c5991be0dda/id-preview-167cb4a0--7bd10eef-cb08-4512-b13b-ea76a6732f0f.lovable.app-1781955324429.png" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "icon", type: "image/png", href: "/icon-512.png" },
       { rel: "apple-touch-icon", href: "/icon-512.png" },
@@ -112,7 +107,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
-  // Light theme by default — no forced dark class.
   return (
     <html lang="en">
       <head>
@@ -132,9 +126,11 @@ function RootComponent() {
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      router.invalidate();
-      if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      (async () => {
+        if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+        router.invalidate();
+        if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      })();
     });
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
@@ -143,7 +139,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ScrollToTop />
       <Outlet />
-      <SupportBadgeMask />
+      <SupportButton />
       <InstallPrompt />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
@@ -158,18 +154,37 @@ function ScrollToTop() {
   return null;
 }
 
-function SupportBadgeMask() {
+function SupportButton() {
+  const [open, setOpen] = useState(false);
   return (
-    <a
-      href="https://wa.link/eyvvsn"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Contact AstroAura support on WhatsApp"
-      className="fixed bottom-24 right-3 z-[2147483647] flex h-[48px] items-center justify-center gap-2 rounded-full border border-primary/30 bg-card/95 px-4 text-primary shadow-lg backdrop-blur transition hover:scale-[1.03] hover:bg-secondary lg:bottom-4 lg:right-4 lg:h-[56px] lg:gap-3 lg:rounded-2xl lg:px-6"
-    >
-      <MessageCircleQuestion className="h-5 w-5 shrink-0 lg:h-6 lg:w-6" />
-      <span className="whitespace-nowrap text-sm font-semibold lg:hidden">Support</span>
-      <span className="hidden whitespace-nowrap text-sm font-semibold lg:inline">Support on WhatsApp</span>
-    </a>
+    <>
+      <button
+        onClick={() => setOpen(!open)}
+        aria-label="Support"
+        className="fixed right-4 top-4 z-[100] flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card/95 text-primary shadow-lg backdrop-blur transition hover:scale-105 active:scale-95 lg:right-6 lg:top-6"
+      >
+        {open ? <X className="h-5 w-5" /> : <MessageCircleQuestion className="h-5 w-5" />}
+      </button>
+      {open && (
+        <div className="fixed right-4 top-16 z-[100] w-72 rounded-2xl border border-border bg-card/95 p-4 shadow-xl backdrop-blur lg:right-6 lg:top-20">
+          <h3 className="font-display text-sm font-semibold text-foreground">Need help?</h3>
+          <p className="mt-1 text-xs text-muted-foreground">We're here to help with any questions about your readings, payments, or account.</p>
+          <a
+            href="https://wa.link/eyvvsn"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition hover:brightness-105"
+          >
+            <MessageCircleQuestion className="h-4 w-4" /> Chat on WhatsApp
+          </a>
+          <button
+            onClick={() => setOpen(false)}
+            className="mt-2 w-full text-center text-xs text-muted-foreground"
+          >
+            Close
+          </button>
+        </div>
+      )}
+    </>
   );
 }
